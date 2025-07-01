@@ -35,7 +35,9 @@ active_connections: Dict[str, WebSocket] = {}
 # Models
 class InterviewRequest(BaseModel):
     candidate_name: str
-    job_requirements: str = "General position"
+    context_id: str | None = None
+    job_requirements: str | None = None
+    language: str = "de"
 
 class JobRequirement(BaseModel):
     title: str
@@ -66,9 +68,16 @@ async def start_interview(request: InterviewRequest, user=Depends(get_current_us
     session_id = str(uuid.uuid4())
     
     try:
+        # Determine job requirements text
+        if request.context_id and request.context_id in stored_contexts:
+            job_text = stored_contexts[request.context_id]["combined_text"]
+        else:
+            job_text = request.job_requirements or "General position"
+
         result = await voice_agent.start_interview(
             session_id=session_id,
-            job_requirements=request.job_requirements
+            job_requirements=job_text,
+            language=request.language
         )
         
         return {
@@ -79,6 +88,8 @@ async def start_interview(request: InterviewRequest, user=Depends(get_current_us
             "candidate_name": request.candidate_name
         }
     except Exception as e:
+        import traceback, sys
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Failed to start interview: {str(e)}")
 
 @app.get("/api/interviews/{session_id}/summary")
@@ -144,20 +155,32 @@ async def websocket_interview(websocket: WebSocket, session_id: str):
 
 # ============ CONTEXT UPLOAD (Company & Role Docs) ============
 
-stored_contexts: Dict[str, Dict[str, str]] = {}
+stored_contexts: Dict[str, Dict[str, str]] = {}  # context_id -> {company, role, combined_text}
 
 @app.post("/api/context/upload")
 async def upload_context(company: UploadFile = File(...), role: UploadFile = File(...)):
     """Upload company philosophy and role requirement docs. Returns context_id."""
     company_bytes = await company.read()
     role_bytes = await role.read()
-    # For demo, we don't parse – just store raw bytes length
+
+    def bytes_to_text(data: bytes) -> str:
+        try:
+            return data.decode("utf-8", errors="ignore")
+        except Exception:
+            return ""
+
+    company_text = bytes_to_text(company_bytes)
+    role_text = bytes_to_text(role_bytes)
+
+    combined_text = f"Unternehmensdokument:\n{company_text}\n\nRollenbeschreibung:\n{role_text}"
+
     context_id = str(uuid.uuid4())
     stored_contexts[context_id] = {
         "company_filename": company.filename,
         "role_filename": role.filename,
-        "company_size": len(company_bytes),
-        "role_size": len(role_bytes)
+        "company_text": company_text,
+        "role_text": role_text,
+        "combined_text": combined_text
     }
     return {"context_id": context_id}
 
@@ -232,4 +255,5 @@ def get_voice_agent_config(user=Depends(get_current_user)):
 if __name__ == "__main__":
     print("🎤 Starting ApplAI Voice Interview Platform...")
     print("🔗 WebSocket available at: ws://localhost:8000/ws/interview/{session_id}")
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    reload_flag = os.getenv("DEV", "0") == "1"
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=reload_flag)
