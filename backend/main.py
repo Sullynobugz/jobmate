@@ -8,6 +8,8 @@ import json
 import uuid
 import asyncio
 import os
+from dotenv import load_dotenv
+load_dotenv()  # Loads variables from .env file
 from typing import Dict, List
 
 # Import our voice agent
@@ -139,6 +141,25 @@ async def websocket_interview(websocket: WebSocket, session_id: str):
             "type": "error",
             "message": str(e)
         }))
+
+# ============ CONTEXT UPLOAD (Company & Role Docs) ============
+
+stored_contexts: Dict[str, Dict[str, str]] = {}
+
+@app.post("/api/context/upload")
+async def upload_context(company: UploadFile = File(...), role: UploadFile = File(...)):
+    """Upload company philosophy and role requirement docs. Returns context_id."""
+    company_bytes = await company.read()
+    role_bytes = await role.read()
+    # For demo, we don't parse – just store raw bytes length
+    context_id = str(uuid.uuid4())
+    stored_contexts[context_id] = {
+        "company_filename": company.filename,
+        "role_filename": role.filename,
+        "company_size": len(company_bytes),
+        "role_size": len(role_bytes)
+    }
+    return {"context_id": context_id}
 
 # ============ JOB MANAGEMENT ============
 

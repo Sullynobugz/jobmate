@@ -14,3 +14,4 @@ numpy==1.24.3
 scipy==1.11.4
 pyaudio==0.2.11
 webrtcvad==2.0.10
+python-dotenv==1.0.1

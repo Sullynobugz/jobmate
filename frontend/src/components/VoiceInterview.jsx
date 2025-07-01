@@ -84,6 +84,7 @@ export default function VoiceInterview() {
 
   // Start interview session
   const startInterview = async () => {
+    const contextId = window.history.state?.usr?.contextId;
     setInterviewStatus('starting');
     
     if (demoMode) {
@@ -108,6 +109,7 @@ export default function VoiceInterview() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+            context_id: contextId,
           candidate_name: 'Demo Candidate',
           job_requirements: 'Software Developer position requiring Python and React skills',
           language

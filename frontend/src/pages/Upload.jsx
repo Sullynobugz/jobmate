@@ -1,20 +1,36 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, FileInput, Button, Group, Text, Alert } from "@mantine/core";
 
 export default function Upload() {
   const [companyDoc, setCompanyDoc] = useState(null);
   const [roleDoc, setRoleDoc] = useState(null);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleStartInterview = () => {
     if (!companyDoc || !roleDoc) {
       setError("Bitte wählen Sie beide Dokumente aus, bevor Sie fortfahren.");
       return;
     }
-    // TODO: upload to backend and navigate to interview console
-    console.log("Company doc:", companyDoc);
-    console.log("Role doc:", roleDoc);
-    alert("Dokumente erfasst – Backend-Upload noch nicht implementiert.");
+    const formData = new FormData();
+    formData.append("company", companyDoc);
+    formData.append("role", roleDoc);
+    fetch("http://localhost:8000/api/context/upload", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.context_id) {
+          navigate("/interview", { state: { contextId: data.context_id } });
+        } else {
+          alert("Fehler beim Hochladen der Dokumente");
+        }
+      })
+      .catch(() => {
+        alert("Fehler beim Hochladen der Dokumente");
+      });
   };
 
   return (
