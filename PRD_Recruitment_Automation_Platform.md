@@ -69,6 +69,11 @@ To become the industry-standard recruitment automation platform, seamlessly inte
 - As a candidate, I can schedule and participate in voice interviews with an AI agent 24/7.
   - Acceptance: Real-time audio processing, natural conversation flow, <2 second response latency.
 
+### Company & Position Context Ingestion
+- As a recruiter, I can upload a company philosophy document (PDF) and a position-requirements document (PDF or TXT).
+  - Acceptance: Supports PDF/TXT/DOCX up to 10 MB each, ≥90 % text extraction accuracy.
+- As a candidate, I receive an introductory briefing at the start of the interview that references the company (e.g., “Everlast”) and the specific role (e.g., “AI Developer”) before substantive questions begin.
+
 ### AI Interview Question Generation
 - As a recruiter, I want the platform to automatically generate relevant interview questions based on job requirements.
   - Acceptance: Questions are role-specific, cover technical and behavioral aspects, customizable by recruiter.
@@ -179,7 +184,7 @@ To become the industry-standard recruitment automation platform, seamlessly inte
 - **AI Conversation Engine**: GPT-4 powered interview conversations with dynamic questioning
 - **Assessment & Scoring**: Real-time candidate evaluation and ranking
 - **Interview Analytics**: Basic dashboards showing interview results and candidate insights
-- **Job Requirements Processing**: Upload job descriptions to generate interview questions
+- **Context Ingestion**: Upload company philosophy & role-requirements documents to steer interview briefing/question generation
 
 ### Phase 2-4 Feature Priorities (6-18 Months)
 - Advanced analytics and benchmarking
