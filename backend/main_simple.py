@@ -109,6 +109,18 @@ class ApplAIHandler(BaseHTTPRequestHandler):
                 }
             }
         
+        elif parsed_path.path == '/api/context/upload':
+            # Pretend we processed both uploaded files and store basic info
+            try:
+                # Note: The built-in http.server doesn't parse multipart, so this is a stub
+                # In real usage, switch to FastAPI backend (main.py) for proper file parsing.
+                response = {
+                    "context_id": str(uuid.uuid4()),
+                    "status": "processed (simple)",
+                }
+            except Exception as exc:
+                response = {"error": f"Failed to process upload: {str(exc)}"}
+        
         else:
             response = {"error": "Endpoint not found"}
         

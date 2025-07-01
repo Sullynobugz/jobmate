@@ -16,20 +16,29 @@ export default function Upload() {
     const formData = new FormData();
     formData.append("company", companyDoc);
     formData.append("role", roleDoc);
+    console.log("Starting upload...");
     fetch("http://localhost:8000/api/context/upload", {
       method: "POST",
       body: formData,
     })
-      .then((res) => res.json())
+      .then((res) => {
+        console.log("Upload response status:", res.status);
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        return res.json();
+      })
       .then((data) => {
+        console.log("Upload success:", data);
         if (data.context_id) {
           navigate("/interview", { state: { contextId: data.context_id } });
         } else {
-          alert("Fehler beim Hochladen der Dokumente");
+          alert("Fehler: Keine context_id erhalten");
         }
       })
-      .catch(() => {
-        alert("Fehler beim Hochladen der Dokumente");
+      .catch((error) => {
+        console.error("Upload error:", error);
+        alert(`Fehler beim Hochladen: ${error.message}`);
       });
   };
 

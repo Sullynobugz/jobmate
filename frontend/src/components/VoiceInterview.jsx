@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Box, Button, Title, Text, Alert, Group, Progress, Card, Switch, Select, ActionIcon } from '@mantine/core';
 import { IconMicrophone, IconMicrophoneOff, IconPlayerPlay, IconPlayerStop, IconLanguage } from '@tabler/icons-react';
 
@@ -10,11 +11,12 @@ export default function VoiceInterview() {
   const [interviewStatus, setInterviewStatus] = useState('not_started'); // not_started, starting, active, completed
   const [liveTranscript, setLiveTranscript] = useState('');
   const [sessionId, setSessionId] = useState(null);
-  const [demoMode, setDemoMode] = useState(true);
+  const [demoMode, setDemoMode] = useState(false);
   const [messages, setMessages] = useState([]);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [language, setLanguage] = useState('de'); // Default to German
   const [answerElapsed, setAnswerElapsed] = useState(0);
+  const location = useLocation();
   const timerRef = useRef(null);
   
   const mediaRecorderRef = useRef(null);
@@ -84,7 +86,7 @@ export default function VoiceInterview() {
 
   // Start interview session
   const startInterview = async () => {
-    const contextId = window.history.state?.usr?.contextId;
+    const contextId = location.state?.contextId;
     setInterviewStatus('starting');
     
     if (demoMode) {
@@ -109,9 +111,8 @@ export default function VoiceInterview() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            context_id: contextId,
+            context_id: contextId ?? undefined,
           candidate_name: 'Demo Candidate',
-          job_requirements: 'Software Developer position requiring Python and React skills',
           language
         })
       });
@@ -335,12 +336,17 @@ export default function VoiceInterview() {
 
       {/* Recording Progress */}
       {isRecording && (
-        <Progress
-          value={(answerElapsed / 60) * 100}
-          size="sm"
-          color={answerElapsed < 30 ? 'orange' : 'green'}
-          mb="md"
-        />
+        <>
+          <Text size="sm" c="orange" mb="xs">
+            {language === 'de' ? 'Aufnahme läuft' : 'Recording'} – {answerElapsed}s
+          </Text>
+          <Progress
+            value={(answerElapsed / 60) * 100}
+            size="sm"
+            color={answerElapsed < 30 ? 'orange' : 'green'}
+            mb="md"
+          />
+        </>
       )}
 
       {/* Connection Status */}
@@ -410,7 +416,7 @@ export default function VoiceInterview() {
             color={isRecording ? 'red' : 'blue'}
             onClick={isRecording ? stopRecording : startRecording}
             leftSection={isRecording ? <IconMicrophoneOff /> : <IconMicrophone />}
-            disabled={(isRecording && answerElapsed < 30) || (!isConnected && !demoMode)}
+            disabled={!isConnected && !demoMode}
           >
             {isRecording
               ? language === 'de'
