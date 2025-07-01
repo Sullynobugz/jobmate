@@ -1,0 +1,30 @@
+# ---- Node / React ----
+node_modules/
+# production build output
+build/
+dist/
+.next/
+.cache/
+
+# ---- Python ----
+venv/
+__pycache__/
+*.py[cod]
+
+# ---- Environment / Secrets ----
+.env*
+
+# ---- Logs ----
+*.log
+
+# ---- OS / Editor miscellany ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# ---- Others ----
+# Ignore generated coverage, test, or temporary files
+coverage/
+.nyc_output/
+*.swp
