@@ -1,111 +1,68 @@
-# ApplAI — Recruiting-Automatisierungs-Plattform
+@AGENTS.md
+
+# JobMate — KI-Karriereplattform
+
+## Status
+Aktiv
 
 ## Was diese App ist
-AI-gestützte Recruiting-Plattform. Recruiter laden Job-Anforderungsdokumente hoch (PDF, DOCX, TXT), die AI extrahiert daraus strukturierte Anforderungen. Kandidaten werden angelegt/importiert, automatisch gegen die Anforderungen gescort und in einer priorisierten Liste dargestellt. Shortlist-Export für den weiteren Prozess.
+Zweiseitige KI-Karriereplattform. Bewerber verbessern ihren Lebenslauf per Claude-Chat, finden passende Stellen über Bundesagentur für Arbeit und Arbeitnow, und tracken ihre Bewerbungen in einem Kanban-Board. Recruiter (Phase 2) können Stellenanforderungen hochladen, Kandidaten matchen und KI-Interviews durchführen.
+
+**Ursprung**: Umbenannt von ApplAI (Recruiter-Tool) zu JobMate (zweiseitige Plattform).
 
 ## Tech Stack
-- **Frontend**: React (Vite), TypeScript, Mantine UI, React Router
-- **Backend**: Node.js + Express, PostgreSQL, Sequelize ORM
-- **AI**: OpenAI API (Anforderungs-Extraktion, Kandidaten-Matching)
-- **Queue**: BullMQ + Redis (Hintergrund-Jobs)
-- **Datei-Parsing**: pdf-parse, docx
-- **Icons**: Tabler Icons
-
-## Aktueller Stand
-Prototyp mit vollständiger MVP-Architektur. Frontend (Kandidaten-Dashboard, Job-Uploads), Backend (API, DB-Schema, Queue) und AI-Integration vorhanden. Multi-Tenancy und RBAC sind von Anfang an eingeplant. Implementierungsgrad der einzelnen Features unklar.
+- **Framework**: Next.js 16 (App Router, Turbopack)
+- **Sprache**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **KI**: Anthropic API (`claude-sonnet-4-6`) — CV-Chat, Verbesserungsvorschläge
+- **Job-APIs**: Bundesagentur für Arbeit REST API + Arbeitnow API (beide gratis)
+- **Geocoding**: Nominatim (OpenStreetMap, gratis)
+- **Persistenz**: localStorage (kein Backend, kein Login)
+- **Deployment**: Vercel (geplant)
 
 ## Architektur
 ```
-ApplAI/
-├── frontend/
-│   ├── src/
-│   │   ├── App.jsx          # React Root + Router
-│   │   ├── components/      # UI-Komponenten
-│   │   ├── pages/           # Dashboard, Jobs, Kandidaten, Shortlist
-│   │   └── main.jsx
-│   └── package.json         # React, Mantine, Axios
-├── backend/
-│   ├── src/
-│   │   ├── main.py / main.js    # API-Einstiegspunkt
-│   │   ├── routes/          # Jobs, Kandidaten, Matching
-│   │   ├── services/        # AI-Service (OpenAI), Parser-Service
-│   │   └── models/          # Sequelize: Job, Candidate, Match
-│   ├── requirements.txt     # (Python-Variante)
-│   └── package.json         # Express, Sequelize, BullMQ, OpenAI
-├── docker-compose.yml       # DB + Redis + API + Frontend
-└── PRD_Recruitment_Automation_Platform.md  # Product Requirements
+src/
+├── app/
+│   ├── page.tsx              # Landing — Pfad-Auswahl (Bewerber / Recruiter)
+│   ├── cv/page.tsx           # CV hochladen + Claude-Chat
+│   ├── jobs/page.tsx         # Job-Suche (BA + Arbeitnow)
+│   ├── board/page.tsx        # Kanban-Board (Drag & Drop)
+│   ├── recruiter/page.tsx    # Recruiter-Portal (Placeholder)
+│   └── api/
+│       ├── cv-chat/route.ts  # → Claude API (Streaming)
+│       ├── cv-parse/route.ts # PDF/TXT Text-Extraktion
+│       ├── jobs/route.ts     # → BA API + Arbeitnow Proxy
+│       └── geocode/route.ts  # → Nominatim (OSM)
+├── store/
+│   └── appStore.ts           # localStorage CRUD (mode, cv, jobs, kanban)
+└── types/index.ts            # Job, KanbanCard, CVData, AppState, etc.
 ```
 
-**Datenfluss**: Upload (PDF/DOCX/TXT) → Parser → OpenAI Extraktion → Job-Anforderungen in DB → Kandidaten-Matching → Score-Ranking → Shortlist-Export
+## Bewerber-Flow
+1. **Landing** → "Ich suche einen Job" wählen
+2. **CV** → PDF/TXT hochladen → Text-Extraktion → Claude-Chat zum Verbessern → Download
+3. **Jobs** → Stichwort + Ort → BA API + Arbeitnow → Job merken (landet im Board)
+4. **Board** → Kanban: Gemerkt → Beworben → Interview → Angebot / Absage
 
 ## Dev-Befehle
 ```bash
-# Alles via Docker
-docker-compose up --build
-
-# Manuell:
-# Backend
-cd backend && npm install && npm run dev   # oder: pip install -r requirements.txt && python main.py
-
-# Frontend
-cd frontend && npm install && npm run dev  # localhost:5173
+npm run dev   # http://localhost:3000 (oder nächster freier Port)
+npm run build
 ```
 
-**Env-Variablen** (`.env` im Backend):
+## Env-Variablen
 ```
-OPENAI_API_KEY=
-DATABASE_URL=postgresql://...
-REDIS_URL=redis://localhost:6379
+ANTHROPIC_API_KEY=sk-ant-...
 ```
 
 ## Nächste Schritte
-1. **AI-Prompt tunen**: Anforderungs-Extraktion und Matching-Scoring verbessern
-2. **Auth**: Login/Register + RBAC (Recruiter vs. Admin)
-3. **Multi-Tenancy**: Mehrere Unternehmen/Teams isoliert
-4. **Kandidaten-Import**: CSV/LinkedIn-Import
-5. **E-Mail-Benachrichtigungen**: Kandidaten automatisch kontaktieren
+1. **Recruiter-Pfad** implementieren: Stellenanforderungen hochladen, Kandidaten-Matching
+2. **Distanz-Radar**: Leaflet-Karte auf der Jobs-Seite mit km-Kreisen
+3. **CV-Export**: Verbesserter Lebenslauf als PDF generieren (react-pdf)
+4. **Deployment**: Vercel + ANTHROPIC_API_KEY als Secret
 
-## Bekannte Probleme / Technische Schulden
-- Backend scheint sowohl Python (`main.py`, `requirements.txt`) als auch Node.js (`package.json`) zu haben — unklar welches aktiv ist
-- `.env` Datei-Handling prüfen (nicht committen)
-- BullMQ benötigt laufenden Redis-Server
-
-## Wichtige Entscheidungen & Konventionen
-- Mantine UI für schnelles, konsistentes Frontend ohne viel Custom-CSS
-- BullMQ für AI-Jobs im Hintergrund (Parsing kann dauern — blockiert nicht den Request)
-- Multi-Tenancy von Anfang an eingeplant (nicht nachträglich)
-- PRD (`PRD_Recruitment_Automation_Platform.md`) als Referenz für Feature-Scope
-
----
-
-## Entwicklungslog & Nächste Schritte
-
-> **Anweisung für Claude Code**: Halte diesen Abschnitt nach jeder Session aktuell.
-> - **Nach Änderungen**: Kurzen Log-Eintrag hinzufügen (Datum + was gemacht + warum)
-> - **Nächste Schritte**: Immer nach Rücksprache mit dem Nutzer definieren — nie eigenständig befüllen
-> - **"Mach weiter"**: Den obersten offenen Punkt aus "Nächste Schritte" aufgreifen und umsetzen, dann Log aktualisieren und neue Schritte vorschlagen
-
-### Nächste Schritte
-- [ ] (noch nicht definiert — bitte kurz besprechen)
-
-### Log
+## Entwicklungslog
 | Datum | Was & Warum |
 |-------|-------------|
-| 2026-05-07 | CLAUDE.md angelegt — Projektdokumentation initialisiert |
-
-
----
-
-## Git-Konvention
-
-Nach jeder größeren Änderung wird committed — niemals ungesicherte Arbeit liegenlassen.
-
-**Wann committen:** Nach jedem abgeschlossenen Feature, Bugfix, Refactoring oder bevor die Session endet.
-
-**Commit-Message Format:**
-```
-<typ>: <kurze Beschreibung was & warum>
-Typen: feat / fix / refactor / docs / chore
-```
-
-**Für Claude Code:** Nach jeder größeren Änderung eigenständig committen. Staging selektiv — keine .env, keine Secrets. Nie blind `git add -A`.
+| 2026-05-19 | Neustart als JobMate — zweiseitige Plattform, Next.js, Bewerber-MVP gebaut |
