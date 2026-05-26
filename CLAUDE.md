@@ -14,9 +14,10 @@ Zweiseitige KI-Karriereplattform. Bewerber verbessern ihren Lebenslauf per Claud
 - **Framework**: Next.js 16 (App Router, Turbopack)
 - **Sprache**: TypeScript
 - **Styling**: Tailwind CSS v4
+- **Icons**: lucide-react
 - **KI**: Anthropic API (`claude-sonnet-4-6`) — CV-Chat, Verbesserungsvorschläge
-- **Job-APIs**: Bundesagentur für Arbeit REST API + Arbeitnow API (beide gratis)
-- **Geocoding**: Nominatim (OpenStreetMap, gratis)
+- **Job-APIs**: 6 Quellen — BA, Arbeitnow, Remotive, RemoteOK (alle gratis/keine Auth) + Adzuna, Jooble (optional mit API-Key)
+- **Geocoding**: Nominatim (OpenStreetMap, gratis) + Haversine-Distanzberechnung
 - **Persistenz**: localStorage (kein Backend, kein Login)
 - **Deployment**: Vercel (geplant)
 
@@ -54,15 +55,22 @@ npm run build
 ## Env-Variablen
 ```
 ANTHROPIC_API_KEY=sk-ant-...
+
+# Optional — aktivieren weitere Job-Quellen:
+ADZUNA_APP_ID=...
+ADZUNA_APP_KEY=...
+JOOBLE_API_KEY=...
 ```
 
 ## Nächste Schritte
 1. **Recruiter-Pfad** implementieren: Stellenanforderungen hochladen, Kandidaten-Matching
-2. **Distanz-Radar**: Leaflet-Karte auf der Jobs-Seite mit km-Kreisen
+2. **Distanz-Radar**: Leaflet-Karte auf der Jobs-Seite mit km-Kreisen (Koordinaten liegen vor)
 3. **CV-Export**: Verbesserter Lebenslauf als PDF generieren (react-pdf)
-4. **Deployment**: Vercel + ANTHROPIC_API_KEY als Secret
+4. **Deployment**: Vercel + alle ENV-Keys als Secrets
+5. **Adzuna/Jooble Keys**: Kostenlos registrieren für ~200 weitere Jobs/Tag
 
 ## Entwicklungslog
 | Datum | Was & Warum |
 |-------|-------------|
 | 2026-05-19 | Neustart als JobMate — zweiseitige Plattform, Next.js, Bewerber-MVP gebaut |
+| 2026-05-26 | 6 Job-Quellen (BA, Arbeitnow, Remotive, RemoteOK + opt. Adzuna/Jooble), Präferenzen-Sidebar (Wohnort, Radius, Remote, Jobtyp), Quellen-Filter, Distanzberechnung via Haversine, verbesserte Job-Cards mit Salary/Tags/Datum |
