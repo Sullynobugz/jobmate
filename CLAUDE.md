@@ -19,7 +19,7 @@ Zweiseitige KI-Karriereplattform. Bewerber verbessern ihren Lebenslauf per Claud
 - **Job-APIs**: 6 Quellen — BA, Arbeitnow, Remotive, RemoteOK (alle gratis/keine Auth) + Adzuna, Jooble (optional mit API-Key)
 - **Geocoding**: Nominatim (OpenStreetMap, gratis) + Haversine-Distanzberechnung
 - **Persistenz**: localStorage (kein Backend, kein Login)
-- **Deployment**: Vercel (geplant)
+- **Deployment**: Coolify (Hetzner 167.233.30.113) → jobmate.techstag.de
 
 ## Architektur
 ```
@@ -66,7 +66,7 @@ JOOBLE_API_KEY=...
 1. **Recruiter-Pfad** implementieren: Stellenanforderungen hochladen, Kandidaten-Matching
 3. **Distanz-Radar**: Leaflet-Karte auf der Jobs-Seite mit km-Kreisen (Koordinaten liegen vor)
 4. **CV-Export**: Verbesserter Lebenslauf als PDF generieren (react-pdf)
-5. **Deployment**: Vercel + alle ENV-Keys als Secrets
+5. **Deployment**: Coolify → jobmate.techstag.de (GitHub-Push + neue Resource, ENV-Keys als Secrets)
 
 ## Backlog
 Leer — alle bekannten Features implementiert.
