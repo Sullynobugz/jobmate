@@ -1,5 +1,9 @@
 export type UserMode = 'seeker' | 'recruiter'
 
+export type JobSource = 'ba' | 'arbeitnow' | 'remotive' | 'remoteok' | 'adzuna' | 'jooble' | 'manual'
+
+export type RemotePreference = 'any' | 'remote' | 'onsite'
+
 export interface Job {
   id: string
   title: string
@@ -7,11 +11,22 @@ export interface Job {
   location: string
   description: string
   url: string
-  source: 'ba' | 'arbeitnow' | 'manual'
+  source: JobSource
   postedAt?: string
-  distance?: number // km
+  distance?: number
   lat?: number
   lng?: number
+  remote?: boolean
+  salary?: string
+  jobType?: string
+  tags?: string[]
+}
+
+export interface SearchPreferences {
+  location: string
+  radius: number
+  remote: RemotePreference
+  jobTypes: string[]
 }
 
 export type KanbanColumn = 'saved' | 'applied' | 'interview' | 'offer' | 'rejected'
@@ -21,11 +36,14 @@ export interface KanbanCard {
   column: KanbanColumn
   addedAt: string
   notes?: string
+  appliedAt?: string    // Timestamp wenn in "applied" verschoben
+  emailProof?: string   // Optionaler E-Mail-Betreff als Nachweis
+  starred?: boolean
 }
 
 export interface CVData {
-  raw: string       // original extracted text
-  improved: string  // Claude-improved version
+  raw: string
+  improved: string
   filename: string
   updatedAt: string
 }
@@ -41,4 +59,6 @@ export interface AppState {
   savedJobs: Job[]
   kanban: KanbanCard[]
   chatHistory: ChatMessage[]
+  preferences: SearchPreferences
+  widCode?: string    // WID-Teilnehmer-Code für Tracking
 }

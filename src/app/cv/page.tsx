@@ -1,24 +1,45 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Upload, Send, FileText, ArrowRight, Download } from 'lucide-react'
+import { Upload, Send, FileText, ArrowRight, Download, Search, Kanban, ChevronRight, PlusCircle, Pencil, Trash2 } from 'lucide-react'
 import { loadState, saveCV, saveChatHistory } from '@/store/appStore'
 import type { ChatMessage } from '@/types'
 import Link from 'next/link'
 
-export default function CVPage() {
-  const router = useRouter()
-  const state = loadState()
+type Mode = 'choice' | 'upload' | 'create' | 'improve'
 
-  const [cvText, setCvText] = useState(state.cv?.improved || state.cv?.raw || '')
-  const [filename, setFilename] = useState(state.cv?.filename || '')
-  const [messages, setMessages] = useState<ChatMessage[]>(state.chatHistory || [])
+const CV_MARKER_START = '--- LEBENSLAUF ---'
+const CV_MARKER_END = '--- ENDE ---'
+
+function extractCvFromMessage(text: string): string | null {
+  const start = text.indexOf(CV_MARKER_START)
+  const end = text.indexOf(CV_MARKER_END)
+  if (start === -1 || end === -1) return null
+  return text.slice(start + CV_MARKER_START.length, end).trim()
+}
+
+export default function CVPage() {
+  const [mode, setMode] = useState<Mode>('choice')
+  const [cvText, setCvText] = useState('')
+  const [filename, setFilename] = useState('')
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [cvCreated, setCvCreated] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const state = loadState()
+    const existing = state.cv?.improved || state.cv?.raw || ''
+    if (existing) {
+      setCvText(existing)
+      setFilename(state.cv?.filename || 'Mein Lebenslauf')
+      setMessages(state.chatHistory || [])
+      setMode('improve')
+    }
+  }, [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -26,24 +47,51 @@ export default function CVPage() {
 
   async function handleFile(file: File) {
     setUploading(true)
+    setMode('upload')
     try {
       const formData = new FormData()
       formData.append('file', file)
       const res = await fetch('/api/cv-parse', { method: 'POST', body: formData })
-      const { text } = await res.json()
+      const data = await res.json()
+      if (!res.ok || data.error) {
+        const errMsg: ChatMessage = {
+          role: 'assistant',
+          content: `❌ ${data.error ?? 'Datei konnte nicht gelesen werden.'} Bitte lade eine TXT-Datei hoch oder kopiere deinen Lebenslauf direkt ins Textfeld.`,
+        }
+        setMessages([errMsg])
+        saveChatHistory([errMsg])
+        return
+      }
+      const text: string = data.text
       setCvText(text)
       setFilename(file.name)
       saveCV({ raw: text, improved: text, filename: file.name, updatedAt: new Date().toISOString() })
       const welcome: ChatMessage = {
         role: 'assistant',
-        content: `✅ Lebenslauf **${file.name}** hochgeladen. Ich habe ihn analysiert und bin bereit, dir zu helfen.\n\nWas möchtest du verbessern? Ich kann dir Feedback geben, Formulierungen überarbeiten oder einen komplett überarbeiteten Entwurf erstellen.`,
+        content: `✅ Lebenslauf **${file.name}** hochgeladen und analysiert.\n\nWas möchtest du verbessern? Ich kann dir Feedback geben, Formulierungen überarbeiten oder einen komplett überarbeiteten Entwurf erstellen.`,
       }
-      const newHistory = [welcome]
-      setMessages(newHistory)
-      saveChatHistory(newHistory)
+      setMessages([welcome])
+      saveChatHistory([welcome])
+      setMode('improve')
+    } catch {
+      const errMsg: ChatMessage = {
+        role: 'assistant',
+        content: '❌ Netzwerkfehler beim Upload. Bitte versuche es erneut.',
+      }
+      setMessages([errMsg])
     } finally {
       setUploading(false)
     }
+  }
+
+  function startCreateMode() {
+    const firstMsg: ChatMessage = {
+      role: 'assistant',
+      content: 'Hallo! Ich helfe dir, einen professionellen Lebenslauf zu erstellen. 📄\n\nFangen wir mit deinen persönlichen Daten an:\n\n**Wie lautet dein vollständiger Name?**',
+    }
+    setMessages([firstMsg])
+    saveChatHistory([firstMsg])
+    setMode('create')
   }
 
   async function send() {
@@ -60,7 +108,8 @@ export default function CVPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: newMessages.map(m => ({ role: m.role, content: m.content })),
-          cvText,
+          cvText: mode === 'improve' ? cvText : undefined,
+          mode: mode === 'create' ? 'create' : 'improve',
         }),
       })
 
@@ -84,12 +133,22 @@ export default function CVPage() {
       const finalHistory = [...newMessages, { role: 'assistant' as const, content: assistantText }]
       saveChatHistory(finalHistory)
 
-      // If response contains an improved CV, save it
-      if (assistantText.includes('---') || assistantText.length > 500) {
-        const improved = assistantText
+      // Erstellter CV aus Marker extrahieren (create mode)
+      if (mode === 'create') {
+        const extracted = extractCvFromMessage(assistantText)
+        if (extracted) {
+          setCvText(extracted)
+          setFilename('Mein Lebenslauf')
+          saveCV({ raw: extracted, improved: extracted, filename: 'Mein Lebenslauf.txt', updatedAt: new Date().toISOString() })
+          setCvCreated(true)
+        }
+      }
+
+      // Verbesserter CV im improve mode
+      if (mode === 'improve' && (assistantText.includes('---') || assistantText.length > 500)) {
         saveCV({
-          raw: state.cv?.raw || cvText,
-          improved,
+          raw: loadState().cv?.raw || cvText,
+          improved: assistantText,
           filename,
           updatedAt: new Date().toISOString(),
         })
@@ -109,28 +168,118 @@ export default function CVPage() {
     URL.revokeObjectURL(url)
   }
 
+  function resetCV() {
+    setCvText('')
+    setFilename('')
+    setMessages([])
+    setMode('choice')
+    setCvCreated(false)
+    saveChatHistory([])
+    saveCV({ raw: '', improved: '', filename: '', updatedAt: new Date().toISOString() })
+  }
+
+  // ---- CHOICE SCREEN ----
+  if (mode === 'choice') {
+    return (
+      <div className="min-h-screen flex flex-col" style={{ background: '#020617' }}>
+        <nav className="flex items-center justify-between px-6 py-3.5 border-b border-slate-800">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-indigo-500 flex items-center justify-center text-white font-black text-sm">J</div>
+            <span className="text-white font-bold">JobMate</span>
+          </Link>
+        </nav>
+
+        <div className="flex-1 flex items-center justify-center px-6">
+          <div className="w-full max-w-md">
+            <div className="text-center mb-10">
+              <div className="text-5xl mb-4">📄</div>
+              <h1 className="text-2xl font-bold text-white mb-2">Lebenslauf</h1>
+              <p className="text-slate-400">Hast du bereits einen Lebenslauf oder möchtest du einen erstellen?</p>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <button
+                onClick={() => fileRef.current?.click()}
+                className="w-full flex items-center gap-4 p-5 rounded-2xl border border-slate-700 hover:border-indigo-500 bg-slate-900/50 hover:bg-slate-800/50 transition-all group text-left"
+              >
+                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-500/20 transition-colors">
+                  <Upload className="w-6 h-6 text-indigo-400" />
+                </div>
+                <div>
+                  <p className="text-white font-semibold">Lebenslauf hochladen</p>
+                  <p className="text-slate-400 text-sm mt-0.5">PDF, DOCX, TXT — dann direkt verbessern</p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-slate-600 ml-auto group-hover:text-indigo-400 transition-colors" />
+              </button>
+              <input ref={fileRef} type="file" accept=".pdf,.docx,.doc,.txt,.rtf" className="hidden"
+                onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
+
+              <button
+                onClick={startCreateMode}
+                className="w-full flex items-center gap-4 p-5 rounded-2xl border border-slate-700 hover:border-emerald-500 bg-slate-900/50 hover:bg-slate-800/50 transition-all group text-left"
+              >
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-500/20 transition-colors">
+                  <PlusCircle className="w-6 h-6 text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-white font-semibold">Lebenslauf erstellen</p>
+                  <p className="text-slate-400 text-sm mt-0.5">Noch keinen? KI führt dich Schritt für Schritt</p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-slate-600 ml-auto group-hover:text-emerald-400 transition-colors" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ---- MAIN LAYOUT (create / improve) ----
+  const isCreateMode = mode === 'create'
+  const chatDisabled = mode === 'improve' && !cvText
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#020617' }}>
 
       {/* Nav */}
-      <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+      <nav className="flex items-center justify-between px-6 py-3.5 border-b border-slate-800">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-indigo-500 flex items-center justify-center text-white font-black text-sm">J</div>
           <span className="text-white font-bold">JobMate</span>
         </Link>
-        <div className="flex items-center gap-3">
+
+        <div className="hidden sm:flex items-center gap-1 text-xs">
+          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 font-medium">
+            <FileText className="w-3.5 h-3.5" />
+            CV {isCreateMode ? 'erstellen' : 'verbessern'}
+          </span>
+          <ChevronRight className="w-3 h-3 text-slate-700" />
+          <Link href="/jobs" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 transition-colors">
+            <Search className="w-3.5 h-3.5" />
+            Jobs suchen
+          </Link>
+          <ChevronRight className="w-3 h-3 text-slate-700" />
+          <Link href="/board" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 transition-colors">
+            <Kanban className="w-3.5 h-3.5" />
+            Board
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-2">
           {cvText && (
             <button onClick={downloadCV} className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-3 py-1.5 rounded-lg border border-slate-700 hover:border-slate-500">
               <Download className="w-4 h-4" />
-              Herunterladen
+              <span className="hidden sm:inline">Download</span>
             </button>
           )}
-          {cvText && (
-            <Link href="/jobs" className="flex items-center gap-1.5 text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-lg transition-colors">
-              Jobs finden
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          )}
+          <button onClick={resetCV} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-300 transition-colors px-3 py-1.5 rounded-lg border border-slate-800 hover:border-slate-700">
+            <Trash2 className="w-4 h-4" />
+            <span className="hidden sm:inline">Neu starten</span>
+          </button>
+          <Link href="/jobs" className="flex items-center gap-1.5 text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-lg transition-colors">
+            Jobs finden
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </nav>
 
@@ -138,35 +287,61 @@ export default function CVPage() {
 
         {/* Left: CV Preview */}
         <div className="w-2/5 border-r border-slate-800 flex flex-col">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2">
-            <FileText className="w-4 h-4 text-slate-400" />
-            <span className="text-slate-300 text-sm font-medium">
-              {filename || 'Lebenslauf'}
-            </span>
+          <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-slate-400" />
+              <span className="text-slate-300 text-sm font-medium truncate">
+                {filename || (isCreateMode ? 'Wird erstellt...' : 'Lebenslauf')}
+              </span>
+            </div>
+            {cvText && !isCreateMode && (
+              <button
+                onClick={() => fileRef.current?.click()}
+                className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+              >
+                <Pencil className="w-3 h-3" />
+                Ersetzen
+              </button>
+            )}
           </div>
+          <input ref={fileRef} type="file" accept=".pdf,.docx,.doc,.txt,.rtf" className="hidden"
+            onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
 
           {!cvText ? (
             <div className="flex-1 flex flex-col items-center justify-center p-8">
-              <div
-                className="w-full max-w-sm border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-2xl p-10 text-center cursor-pointer transition-all group"
-                onClick={() => fileRef.current?.click()}
-                onDragOver={e => e.preventDefault()}
-                onDrop={e => {
-                  e.preventDefault()
-                  const file = e.dataTransfer.files[0]
-                  if (file) handleFile(file)
-                }}
-              >
-                <Upload className="w-10 h-10 text-slate-600 group-hover:text-indigo-400 mx-auto mb-4 transition-colors" />
-                <p className="text-slate-300 font-semibold mb-1">Lebenslauf hochladen</p>
-                <p className="text-slate-500 text-sm">PDF oder TXT · Drag & Drop</p>
-                {uploading && <p className="text-indigo-400 text-sm mt-3">Wird verarbeitet...</p>}
-              </div>
-              <input ref={fileRef} type="file" accept=".pdf,.txt" className="hidden"
-                onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
+              {isCreateMode ? (
+                <div className="text-center">
+                  <div className="text-4xl mb-4 animate-pulse">✍️</div>
+                  <p className="text-slate-300 font-semibold mb-2">Lebenslauf wird erstellt</p>
+                  <p className="text-slate-500 text-sm max-w-xs">
+                    Beantworte die Fragen im Chat — dein Lebenslauf erscheint hier sobald er fertig ist.
+                  </p>
+                </div>
+              ) : (
+                <div
+                  className="w-full max-w-sm border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-2xl p-10 text-center cursor-pointer transition-all group"
+                  onClick={() => fileRef.current?.click()}
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={e => {
+                    e.preventDefault()
+                    const file = e.dataTransfer.files[0]
+                    if (file) handleFile(file)
+                  }}
+                >
+                  <Upload className="w-10 h-10 text-slate-600 group-hover:text-indigo-400 mx-auto mb-4 transition-colors" />
+                  <p className="text-slate-300 font-semibold mb-1">Lebenslauf hochladen</p>
+                  <p className="text-slate-500 text-sm">PDF · DOCX · DOC · TXT · Drag & Drop</p>
+                  {uploading && <p className="text-indigo-400 text-sm mt-3">Wird verarbeitet...</p>}
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto p-4">
+              {cvCreated && (
+                <div className="mb-3 px-3 py-2 rounded-xl text-xs font-medium text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2">
+                  ✅ Lebenslauf erstellt — du kannst ihn jetzt weiter verbessern!
+                </div>
+              )}
               <pre className="text-slate-300 text-xs leading-relaxed whitespace-pre-wrap font-mono bg-slate-900/50 rounded-xl p-4 min-h-full">
                 {cvText}
               </pre>
@@ -182,7 +357,9 @@ export default function CVPage() {
                 <div className="text-4xl mb-4">🤖</div>
                 <p className="text-slate-300 font-semibold mb-2">Dein KI-Karriere-Coach</p>
                 <p className="text-slate-500 text-sm max-w-xs">
-                  Lade deinen Lebenslauf hoch — dann analysiere ich ihn und gebe dir konkrete Verbesserungsvorschläge.
+                  {isCreateMode
+                    ? 'Ich führe dich Schritt für Schritt durch die Erstellung deines Lebenslaufs.'
+                    : 'Lade deinen Lebenslauf hoch — dann analysiere ich ihn und gebe dir konkrete Verbesserungsvorschläge.'}
                 </p>
               </div>
             )}
@@ -195,7 +372,12 @@ export default function CVPage() {
                       : 'bg-slate-800 text-slate-200 rounded-bl-sm'
                   }`}
                 >
-                  <div className="whitespace-pre-wrap">{msg.content}</div>
+                  <div className="whitespace-pre-wrap">
+                    {msg.role === 'assistant' && isCreateMode
+                      ? msg.content
+                          .replace(new RegExp(`${CV_MARKER_START}[\\s\\S]*?${CV_MARKER_END}`, 'g'), '✅ *Lebenslauf gespeichert — sieh links!*')
+                      : msg.content}
+                  </div>
                 </div>
               </div>
             ))}
@@ -215,18 +397,41 @@ export default function CVPage() {
 
           {/* Input */}
           <div className="px-6 py-4 border-t border-slate-800">
+            {cvCreated && isCreateMode && (
+              <div className="flex gap-2 mb-3">
+                <button
+                  onClick={() => { setMode('improve'); setCvCreated(false) }}
+                  className="flex-1 py-2 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-colors flex items-center justify-center gap-2"
+                >
+                  <Pencil className="w-4 h-4" />
+                  Lebenslauf weiter verbessern
+                </button>
+                <Link href="/jobs"
+                  className="flex-1 py-2 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors flex items-center justify-center gap-2"
+                >
+                  Jobs suchen
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            )}
             <div className="flex gap-3">
               <input
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
-                placeholder={cvText ? 'Frag mich etwas zu deinem Lebenslauf...' : 'Lade zuerst deinen Lebenslauf hoch'}
-                disabled={!cvText || loading}
+                placeholder={
+                  isCreateMode
+                    ? 'Antworte auf die Frage...'
+                    : chatDisabled
+                    ? 'Lade zuerst deinen Lebenslauf hoch'
+                    : 'Frag mich etwas zu deinem Lebenslauf...'
+                }
+                disabled={chatDisabled || loading}
                 className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-50"
               />
               <button
                 onClick={send}
-                disabled={!input.trim() || loading || !cvText}
+                disabled={!input.trim() || loading || chatDisabled}
                 className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white rounded-xl px-4 py-3 transition-colors"
               >
                 <Send className="w-4 h-4" />

@@ -1,18 +1,26 @@
 'use client'
 
-import type { AppState, CVData, Job, KanbanCard, KanbanColumn, ChatMessage, UserMode } from '@/types'
+import type { AppState, CVData, Job, KanbanCard, KanbanColumn, ChatMessage, UserMode, SearchPreferences } from '@/types'
 
 const KEY = 'jobmate_state'
 
+const DEFAULT_PREFS: SearchPreferences = {
+  location: '',
+  radius: 50,
+  remote: 'any',
+  jobTypes: [],
+}
+
 function defaultState(): AppState {
-  return { mode: null, cv: null, savedJobs: [], kanban: [], chatHistory: [] }
+  return { mode: null, cv: null, savedJobs: [], kanban: [], chatHistory: [], preferences: DEFAULT_PREFS }
 }
 
 export function loadState(): AppState {
   if (typeof window === 'undefined') return defaultState()
   try {
     const raw = localStorage.getItem(KEY)
-    return raw ? { ...defaultState(), ...JSON.parse(raw) } : defaultState()
+    const parsed = raw ? JSON.parse(raw) : {}
+    return { ...defaultState(), ...parsed, preferences: { ...DEFAULT_PREFS, ...(parsed.preferences ?? {}) } }
   } catch {
     return defaultState()
   }
@@ -37,6 +45,11 @@ export function saveChatHistory(history: ChatMessage[]) {
   save({ ...s, chatHistory: history })
 }
 
+export function savePreferences(prefs: SearchPreferences) {
+  const s = loadState()
+  save({ ...s, preferences: prefs })
+}
+
 export function addJob(job: Job) {
   const s = loadState()
   if (s.savedJobs.find(j => j.id === job.id)) return
@@ -59,11 +72,21 @@ export function addToKanban(jobId: string, column: KanbanColumn = 'saved') {
   save({ ...s, kanban: [...s.kanban, card] })
 }
 
-export function moveKanbanCard(jobId: string, column: KanbanColumn) {
+export function moveKanbanCard(jobId: string, column: KanbanColumn, extra?: { appliedAt?: string; emailProof?: string }) {
   const s = loadState()
   save({
     ...s,
-    kanban: s.kanban.map(k => k.jobId === jobId ? { ...k, column } : k),
+    kanban: s.kanban.map(k => k.jobId === jobId
+      ? { ...k, column, ...(extra ?? {}) }
+      : k),
+  })
+}
+
+export function toggleStar(jobId: string) {
+  const s = loadState()
+  save({
+    ...s,
+    kanban: s.kanban.map(k => k.jobId === jobId ? { ...k, starred: !k.starred } : k),
   })
 }
 
@@ -77,4 +100,38 @@ export function updateKanbanNote(jobId: string, notes: string) {
 
 export function getJobById(jobId: string): Job | undefined {
   return loadState().savedJobs.find(j => j.id === jobId)
+}
+
+export function getWidCode(): string | undefined {
+  return loadState().widCode
+}
+
+export function setWidCode(code: string) {
+  const s = loadState()
+  save({ ...s, widCode: code.trim().toUpperCase() })
+}
+
+// Sendet Bewerbung an WID-Tracking-API (fire-and-forget)
+export async function trackApplicationToWid(job: Job, appliedAt: string, emailProof?: string) {
+  const widCode = getWidCode()
+  if (!widCode) return
+  try {
+    await fetch('https://wid.techstag.de/api/participant/track', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        participantCode: widCode,
+        app: 'jobmate',
+        type: 'application',
+        data: {
+          jobId: job.id,
+          jobTitle: job.title,
+          company: job.company,
+          jobUrl: job.url,
+          appliedAt,
+          emailProof: emailProof ?? null,
+        },
+      }),
+    })
+  } catch { /* ignorieren — Tracking ist optional */ }
 }
