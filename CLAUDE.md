@@ -63,11 +63,16 @@ JOOBLE_API_KEY=...
 ```
 
 ## Nächste Schritte
-1. **Recruiter-Pfad** implementieren: Stellenanforderungen hochladen, Kandidaten-Matching
-2. **Distanz-Radar**: Leaflet-Karte auf der Jobs-Seite mit km-Kreisen (Koordinaten liegen vor)
-3. **CV-Export**: Verbesserter Lebenslauf als PDF generieren (react-pdf)
-4. **Deployment**: Vercel + alle ENV-Keys als Secrets
-5. **Adzuna/Jooble Keys**: Kostenlos registrieren für ~200 weitere Jobs/Tag
+1. **Bewerbungsgespräch-Simulator** — Whisper-Transkription + Claude-Feedback (siehe Backlog)
+2. **Recruiter-Pfad** implementieren: Stellenanforderungen hochladen, Kandidaten-Matching
+3. **Distanz-Radar**: Leaflet-Karte auf der Jobs-Seite mit km-Kreisen (Koordinaten liegen vor)
+4. **CV-Export**: Verbesserter Lebenslauf als PDF generieren (react-pdf)
+5. **Deployment**: Vercel + alle ENV-Keys als Secrets
+
+## Backlog
+| Feature | Beschreibung | Priorität |
+|---------|-------------|-----------|
+| **Bewerbungsgespräch-Simulator** | Nutzer spricht Antworten via Mikrofon → Whisper transkribiert → Claude bewertet: Inhalt, Klarheit, Stärken/Schwächen, konkrete Verbesserungsvorschläge. Optionale Eingabe: Stellenbezeichnung + eigener CV als Kontext für relevantes Feedback. | Hoch |
 
 ## Entwicklungslog
 | Datum | Was & Warum |
