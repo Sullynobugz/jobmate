@@ -128,34 +128,43 @@ export default function CVPage() {
 
       // Leere Assistenten-Nachricht in State, React rendert den DOM-Node
       setMessages(prev => [...prev, { role: 'assistant', content: '' }])
-      // Zwei rAF-Frames warten bis React den Node committed hat
       await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
 
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
       let displayed = 0
       let streamDone = false
+      let frame = 0
+      const MIN_BUFFER = 50   // erst starten wenn 50 Zeichen im Puffer
+      const SPEED = 2         // Zeichen pro Frame während Stream (~80/sec bei 60fps)
+      const SPEED_DONE = 30   // schnelles Aufholen nach Stream-Ende
 
-      // rAF-Loop: direkte DOM-Manipulation, kein React-Re-render während Stream
       const animate = () => {
         const raw = rawBufferRef.current
-        if (streamDone) {
-          // Stream fertig → Rest sofort anzeigen
-          if (streamingDivRef.current && displayed < raw.length) {
-            streamingDivRef.current.textContent = raw
-            displayed = raw.length
-            bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-          }
+        const ahead = raw.length - displayed
+
+        // Warten bis Mindestpuffer gefüllt ist (außer Stream ist schon fertig)
+        if (!streamDone && ahead < MIN_BUFFER) {
+          rafRef.current = requestAnimationFrame(animate)
           return
         }
+
         if (displayed < raw.length) {
-          displayed = Math.min(displayed + 5, raw.length)
+          const step = streamDone ? SPEED_DONE : SPEED
+          displayed = Math.min(displayed + step, raw.length)
           if (streamingDivRef.current) {
             streamingDivRef.current.textContent = raw.slice(0, displayed)
-            bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
           }
+          // Scroll seltener aufrufen — kein konkurrierende smooth-Animationen
+          if (frame % 8 === 0 && bottomRef.current) {
+            bottomRef.current.scrollIntoView({ behavior: 'instant' } as ScrollIntoViewOptions)
+          }
+          frame++
         }
-        rafRef.current = requestAnimationFrame(animate)
+
+        if (!streamDone || displayed < rawBufferRef.current.length) {
+          rafRef.current = requestAnimationFrame(animate)
+        }
       }
       rafRef.current = requestAnimationFrame(animate)
 
@@ -166,8 +175,14 @@ export default function CVPage() {
       }
       streamDone = true
 
-      // Ein Frame warten damit animate() den finalen Text setzt
-      await new Promise(r => requestAnimationFrame(r))
+      // Auf Animation warten bis Puffer leer
+      await new Promise<void>(resolve => {
+        const wait = () => {
+          if (displayed >= rawBufferRef.current.length) resolve()
+          else requestAnimationFrame(wait)
+        }
+        requestAnimationFrame(wait)
+      })
 
       // React-State einmalig auf Endtext setzen
       const finalText = rawBufferRef.current
