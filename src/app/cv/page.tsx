@@ -30,6 +30,8 @@ export default function CVPage() {
   const [cvCreated, setCvCreated] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const rawBufferRef = useRef('')
+  const animIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     const state = loadState()
@@ -108,6 +110,10 @@ export default function CVPage() {
     setInput('')
     setLoading(true)
 
+    rawBufferRef.current = ''
+    let displayed = 0
+    if (animIntervalRef.current) clearInterval(animIntervalRef.current)
+
     try {
       const res = await fetch('/api/cv-chat', {
         method: 'POST',
@@ -122,26 +128,40 @@ export default function CVPage() {
       if (!res.body) return
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
-      let assistantText = ''
-      const assistantMsg: ChatMessage = { role: 'assistant', content: '' }
-      setMessages(prev => [...prev, assistantMsg])
+      setMessages(prev => [...prev, { role: 'assistant', content: '' }])
+
+      // Smooth typewriter: zeigt 5 Zeichen pro 16ms (~300 Zeichen/Sek)
+      animIntervalRef.current = setInterval(() => {
+        const raw = rawBufferRef.current
+        if (displayed >= raw.length) return
+        displayed = Math.min(displayed + 5, raw.length)
+        setMessages(prev => [
+          ...prev.slice(0, -1),
+          { role: 'assistant', content: raw.slice(0, displayed) },
+        ])
+      }, 16)
 
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
-        assistantText += decoder.decode(value, { stream: true })
-        setMessages(prev => [
-          ...prev.slice(0, -1),
-          { role: 'assistant', content: assistantText },
-        ])
+        rawBufferRef.current += decoder.decode(value, { stream: true })
       }
 
-      const finalHistory = [...newMessages, { role: 'assistant' as const, content: assistantText }]
-      saveChatHistory(finalHistory)
+      // Warten bis Animation den Buffer aufgeholt hat
+      await new Promise<void>(resolve => {
+        const waitId = setInterval(() => {
+          if (displayed >= rawBufferRef.current.length) {
+            clearInterval(waitId)
+            resolve()
+          }
+        }, 16)
+      })
 
-      // Erstellter CV aus Marker extrahieren (create mode)
+      const finalText = rawBufferRef.current
+      saveChatHistory([...newMessages, { role: 'assistant' as const, content: finalText }])
+
       if (mode === 'create') {
-        const extracted = extractCvFromMessage(assistantText)
+        const extracted = extractCvFromMessage(finalText)
         if (extracted) {
           setCvText(extracted)
           setFilename('Mein Lebenslauf')
@@ -150,16 +170,16 @@ export default function CVPage() {
         }
       }
 
-      // Verbesserter CV im improve mode
-      if (mode === 'improve' && (assistantText.includes('---') || assistantText.length > 500)) {
+      if (mode === 'improve' && (finalText.includes('---') || finalText.length > 500)) {
         saveCV({
           raw: loadState().cv?.raw || cvText,
-          improved: assistantText,
+          improved: finalText,
           filename,
           updatedAt: new Date().toISOString(),
         })
       }
     } finally {
+      if (animIntervalRef.current) { clearInterval(animIntervalRef.current); animIntervalRef.current = null }
       setLoading(false)
     }
   }
