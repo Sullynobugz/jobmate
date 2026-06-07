@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {
   Mic, MicOff, Send, ChevronRight, Briefcase, FileText,
   Kanban, ArrowLeft, Star, TrendingUp, CheckCircle2, RefreshCw,
-  MessageSquare,
+  MessageSquare, BookOpen, PlayCircle,
 } from 'lucide-react'
 import { loadState } from '@/store/appStore'
 import type { Job, ChatMessage } from '@/types'
@@ -117,6 +117,44 @@ function JobSelector({ jobs, selected, onSelect }: {
   )
 }
 
+type Step = 'setup' | 'prepare' | 'interview'
+
+function PrepGuide({ text }: { text: string }) {
+  const sections = text.split(/^## /m).filter(Boolean)
+  return (
+    <div className="space-y-5">
+      {sections.map((section, i) => {
+        const [headline, ...rest] = section.split('\n')
+        const body = rest.join('\n').trim()
+        const lines = body.split('\n').filter(Boolean)
+        return (
+          <div key={i} className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
+            <h3 className="text-sm font-semibold text-white mb-3">{headline.trim()}</h3>
+            <div className="space-y-2">
+              {lines.map((line, j) => {
+                const clean = line.replace(/^[-*•]\s*/, '').replace(/^\d+\.\s*/, '')
+                const isBullet = /^[-*•]/.test(line) || /^\d+\./.test(line)
+                if (line.startsWith('**') || line.startsWith('###')) {
+                  return <p key={j} className="text-xs font-semibold text-indigo-400 mt-3">{clean.replace(/\*\*/g, '')}</p>
+                }
+                if (isBullet) {
+                  return (
+                    <div key={j} className="flex gap-2 text-xs text-slate-300 leading-relaxed">
+                      <span className="text-indigo-500 mt-0.5 flex-shrink-0">›</span>
+                      <span>{clean.replace(/\*\*/g, '').replace(/\*/g, '')}</span>
+                    </div>
+                  )
+                }
+                return <p key={j} className="text-xs text-slate-400 leading-relaxed">{clean.replace(/\*\*/g, '')}</p>
+              })}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 export default function InterviewPage() {
   const [savedJobs, setSavedJobs] = useState<Job[]>([])
   const [cvText, setCvText] = useState<string>('')
@@ -124,7 +162,9 @@ export default function InterviewPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [started, setStarted] = useState(false)
+  const [step, setStep] = useState<Step>('setup')
+  const [prepGuide, setPrepGuide] = useState('')
+  const [prepLoading, setPrepLoading] = useState(false)
   const [recording, setRecording] = useState(false)
   const [speechSupported, setSpeechSupported] = useState(false)
   const [questionCount, setQuestionCount] = useState(0)
@@ -145,12 +185,42 @@ export default function InterviewPage() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
 
+  async function startPrep() {
+    if (!selectedJob) return
+    setStep('prepare')
+    setPrepGuide('')
+    setPrepLoading(true)
+    const res = await fetch('/api/interview-prep', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ job: selectedJob, cvText }),
+    })
+    const reader = res.body!.getReader()
+    const decoder = new TextDecoder()
+    let full = ''
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      full += decoder.decode(value, { stream: true })
+      setPrepGuide(full)
+    }
+    setPrepLoading(false)
+  }
+
   async function startInterview() {
     if (!selectedJob) return
-    setStarted(true)
+    setStep('interview')
     setMessages([])
     setQuestionCount(0)
     await sendToApi([], selectedJob)
+  }
+
+  function reset() {
+    setStep('setup')
+    setMessages([])
+    setInput('')
+    setQuestionCount(0)
+    setPrepGuide('')
   }
 
   async function sendToApi(history: Message[], job: Job, userMessage?: string) {
@@ -239,15 +309,8 @@ export default function InterviewPage() {
     setRecording(true)
   }, [recording, speechSupported])
 
-  function reset() {
-    setStarted(false)
-    setMessages([])
-    setInput('')
-    setQuestionCount(0)
-  }
-
   // ── Setup Screen ─────────────────────────────────────────────────
-  if (!started) {
+  if (step === 'setup') {
     return (
       <div className="min-h-screen flex flex-col" style={{ background: '#020617' }}>
         <Nav hasCV={!!cvText} />
@@ -257,9 +320,9 @@ export default function InterviewPage() {
               <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto mb-4">
                 <MessageSquare className="w-7 h-7 text-indigo-400" />
               </div>
-              <h1 className="text-2xl font-bold text-white">Bewerbungsgespräch üben</h1>
+              <h1 className="text-2xl font-bold text-white">Interview-Vorbereitung</h1>
               <p className="text-slate-400 text-sm leading-relaxed">
-                KI spielt den HR-Manager. Übe realistische Fragen, bekomme sofort Feedback.
+                KI analysiert die Stelle, bereitet dich vor — dann übst du das Gespräch.
               </p>
             </div>
 
@@ -271,11 +334,7 @@ export default function InterviewPage() {
             )}
 
             <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 space-y-4">
-              <JobSelector
-                jobs={savedJobs}
-                selected={selectedJob}
-                onSelect={setSelectedJob}
-              />
+              <JobSelector jobs={savedJobs} selected={selectedJob} onSelect={setSelectedJob} />
             </div>
 
             {savedJobs.length === 0 && !selectedJob && (
@@ -285,20 +344,77 @@ export default function InterviewPage() {
               </p>
             )}
 
-            <button
-              onClick={startInterview}
-              disabled={!selectedJob}
-              className="w-full py-3.5 rounded-2xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-indigo-600 hover:bg-indigo-500 text-white"
-            >
-              Gespräch starten
-            </button>
+            <div className="space-y-3">
+              <button
+                onClick={startPrep}
+                disabled={!selectedJob}
+                className="w-full py-3.5 rounded-2xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center gap-2"
+              >
+                <BookOpen className="w-4 h-4" />
+                Vorbereitung starten
+              </button>
+              <button
+                onClick={startInterview}
+                disabled={!selectedJob}
+                className="w-full py-3 rounded-2xl text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed border border-slate-700 text-slate-400 hover:text-white hover:border-slate-500 flex items-center justify-center gap-2"
+              >
+                <PlayCircle className="w-4 h-4" />
+                Direkt zum Gespräch
+              </button>
+            </div>
           </div>
         </div>
       </div>
     )
   }
 
+  // ── Prepare Screen ────────────────────────────────────────────────
+  if (step === 'prepare') {
+    return (
+      <div className="min-h-screen flex flex-col" style={{ background: '#020617' }}>
+        <Nav hasCV={!!cvText} />
+        <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-800 bg-slate-900/50">
+          <button onClick={() => setStep('setup')} className="p-1.5 text-slate-500 hover:text-white transition-colors rounded-lg hover:bg-slate-800">
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-white">{selectedJob?.title}</p>
+            {selectedJob?.company && <p className="text-xs text-slate-500">{selectedJob.company}</p>}
+          </div>
+          <button
+            onClick={startInterview}
+            disabled={prepLoading}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white transition-colors"
+          >
+            <PlayCircle className="w-4 h-4" />
+            Gespräch starten
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-4 py-6 max-w-2xl mx-auto w-full">
+          {prepLoading && !prepGuide && (
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <div className="w-8 h-8 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+              <p className="text-sm text-slate-500">Analysiere Stellenanzeige…</p>
+            </div>
+          )}
+          {prepGuide && <PrepGuide text={prepGuide} />}
+          {!prepLoading && prepGuide && (
+            <button
+              onClick={startInterview}
+              className="w-full mt-6 py-3.5 rounded-2xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors flex items-center justify-center gap-2"
+            >
+              <PlayCircle className="w-4 h-4" />
+              Jetzt Gespräch üben
+            </button>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   // ── Interview Screen ──────────────────────────────────────────────
+  if (step !== 'interview') return null
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#020617' }}>
       <Nav hasCV={!!cvText} />
