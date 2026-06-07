@@ -120,6 +120,19 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 15%, transparent);
 }
 
+/* ── Chat message slide-in ──────────────────────────────────── */
+
+@keyframes chat-in-user {
+  from { opacity: 0; transform: translateX(16px) translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes chat-in-bot {
+  from { opacity: 0; transform: translateX(-16px) translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+.chat-msg-user { animation: chat-in-user 200ms ease-out both; }
+.chat-msg-bot  { animation: chat-in-bot  200ms ease-out both; }
+
 /* ── Scrollbar ──────────────────────────────────────────────── */
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }

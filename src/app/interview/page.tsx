@@ -314,7 +314,7 @@ export default function InterviewPage() {
   if (step === 'setup') {
     return (
       <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
-        <Nav hasCV={!!cvText} />
+        <Nav />
         <div className="flex-1 flex items-center justify-center px-4 py-12">
           <div className="w-full max-w-lg space-y-6">
             <div className="text-center space-y-2">
@@ -373,7 +373,7 @@ export default function InterviewPage() {
   if (step === 'prepare') {
     return (
       <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
-        <Nav hasCV={!!cvText} />
+        <Nav />
         <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-800 bg-slate-900/50">
           <button onClick={() => setStep('setup')} className="p-1.5 text-slate-500 hover:text-white transition-colors rounded-lg hover:bg-slate-800">
             <ArrowLeft className="w-4 h-4" />
@@ -418,7 +418,7 @@ export default function InterviewPage() {
   if (step !== 'interview') return null
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
-      <Nav hasCV={!!cvText} />
+      <Nav />
 
       {/* Interview Header */}
       <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-800 bg-slate-900/50">

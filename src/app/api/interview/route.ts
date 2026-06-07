@@ -47,6 +47,12 @@ export async function POST(req: NextRequest) {
         controller.close()
       },
     }),
-    { headers: { 'Content-Type': 'text/plain; charset=utf-8' } }
+    {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-cache',
+        'X-Accel-Buffering': 'no',
+      },
+    }
   )
 }

@@ -39,7 +39,12 @@ export default function CVPage() {
       setFilename(state.cv?.filename || 'Mein Lebenslauf')
       setMessages(state.chatHistory || [])
       setMode('improve')
+      return
     }
+    const params = new URLSearchParams(window.location.search)
+    const start = params.get('start')
+    if (start === 'create') startCreateMode()
+    else if (start === 'upload') setMode('improve') // zeigt Upload-Dropzone direkt
   }, [])
 
   useEffect(() => {
@@ -235,37 +240,25 @@ export default function CVPage() {
   const chatDisabled = mode === 'improve' && !cvText
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
+    <div className="h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
 
       <Nav />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0 overflow-hidden">
 
         {/* Left: CV Preview */}
-        <div className="w-2/5 border-r border-slate-800 flex flex-col">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-slate-400" />
-              <span className="text-slate-300 text-sm font-medium truncate">
-                {filename || (isCreateMode ? 'Wird erstellt...' : 'Lebenslauf')}
-              </span>
-            </div>
-            {cvText && !isCreateMode && (
-              <button
-                onClick={() => fileRef.current?.click()}
-                className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
-              >
-                <Pencil className="w-3 h-3" />
-                Ersetzen
-              </button>
-            )}
+        <div className="w-2/5 border-r border-slate-800 flex flex-col min-h-0">
+          <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2">
+            <FileText className="w-4 h-4 text-slate-400 flex-shrink-0" />
+            <span className="text-slate-400 text-sm font-medium">Lebenslauf</span>
           </div>
           <input ref={fileRef} type="file" accept=".pdf,.docx,.doc,.txt,.rtf" className="hidden"
             onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
 
-          {!cvText ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-8">
-              {isCreateMode ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-6 gap-4">
+            {!cvText ? (
+              /* Upload-Dropzone */
+              isCreateMode ? (
                 <div className="text-center">
                   <div className="text-4xl mb-4 animate-pulse">✍️</div>
                   <p className="text-slate-300 font-semibold mb-2">Lebenslauf wird erstellt</p>
@@ -275,7 +268,7 @@ export default function CVPage() {
                 </div>
               ) : (
                 <div
-                  className="w-full max-w-sm border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-2xl p-10 text-center cursor-pointer transition-all group"
+                  className="w-full border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-2xl p-8 text-center cursor-pointer transition-all group"
                   onClick={() => fileRef.current?.click()}
                   onDragOver={e => e.preventDefault()}
                   onDrop={e => {
@@ -284,30 +277,51 @@ export default function CVPage() {
                     if (file) handleFile(file)
                   }}
                 >
-                  <Upload className="w-10 h-10 text-slate-600 group-hover:text-indigo-400 mx-auto mb-4 transition-colors" />
+                  <Upload className="w-10 h-10 text-slate-600 group-hover:text-indigo-400 mx-auto mb-3 transition-colors" />
                   <p className="text-slate-300 font-semibold mb-1">Lebenslauf hochladen</p>
-                  <p className="text-slate-500 text-sm">PDF · DOCX · DOC · TXT · Drag & Drop</p>
-                  {uploading && <p className="text-indigo-400 text-sm mt-3">Wird verarbeitet...</p>}
+                  <p className="text-slate-500 text-sm">PDF · DOCX · TXT · Drag & Drop</p>
+                  {uploading && <p className="text-indigo-400 text-sm mt-3 animate-pulse">Wird verarbeitet...</p>}
                 </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex-1 overflow-y-auto p-4">
-              {cvCreated && (
-                <div className="mb-3 px-3 py-2 rounded-xl text-xs font-medium text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2">
-                  ✅ Lebenslauf erstellt — du kannst ihn jetzt weiter verbessern!
+              )
+            ) : (
+              /* Datei-Info — kein langer Text, nur Dateiname + Aktionen */
+              <div className="w-full space-y-3">
+                {cvCreated && (
+                  <div className="px-3 py-2 rounded-xl text-xs font-medium text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2">
+                    ✅ Lebenslauf erstellt!
+                  </div>
+                )}
+                <div className="flex flex-col items-center gap-3 p-5 rounded-2xl bg-slate-900/60 border border-slate-700">
+                  <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                    <FileText className="w-7 h-7 text-indigo-400" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-slate-200 font-semibold text-sm truncate max-w-full">{filename || 'Lebenslauf'}</p>
+                    <p className="text-slate-500 text-xs mt-0.5">{cvText.length} Zeichen · bereit zur Verbesserung</p>
+                  </div>
+                  <button
+                    onClick={downloadCV}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white border border-slate-700 hover:border-slate-500 transition-colors"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Herunterladen
+                  </button>
                 </div>
-              )}
-              <pre className="text-slate-300 text-xs leading-relaxed whitespace-pre-wrap font-mono bg-slate-900/50 rounded-xl p-4 min-h-full">
-                {cvText}
-              </pre>
-            </div>
-          )}
+                <button
+                  onClick={() => fileRef.current?.click()}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-300 border border-slate-800 hover:border-slate-600 transition-colors"
+                >
+                  <Pencil className="w-3 h-3" />
+                  Andere Datei hochladen
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Right: Chat */}
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <div className="text-4xl mb-4">🤖</div>
@@ -320,7 +334,10 @@ export default function CVPage() {
               </div>
             )}
             {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div
+                key={i}
+                className={`flex ${msg.role === 'user' ? 'justify-end chat-msg-user' : 'justify-start chat-msg-bot'}`}
+              >
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                     msg.role === 'user'
