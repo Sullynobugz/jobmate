@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
+import { Nav as JobNav } from '@/components/Nav'
 import {
   Mic, MicOff, Send, ChevronRight, Briefcase, FileText,
   Kanban, ArrowLeft, Star, TrendingUp, CheckCircle2, RefreshCw,
@@ -312,7 +313,7 @@ export default function InterviewPage() {
   // ── Setup Screen ─────────────────────────────────────────────────
   if (step === 'setup') {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: '#020617' }}>
+      <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
         <Nav hasCV={!!cvText} />
         <div className="flex-1 flex items-center justify-center px-4 py-12">
           <div className="w-full max-w-lg space-y-6">
@@ -371,7 +372,7 @@ export default function InterviewPage() {
   // ── Prepare Screen ────────────────────────────────────────────────
   if (step === 'prepare') {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: '#020617' }}>
+      <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
         <Nav hasCV={!!cvText} />
         <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-800 bg-slate-900/50">
           <button onClick={() => setStep('setup')} className="p-1.5 text-slate-500 hover:text-white transition-colors rounded-lg hover:bg-slate-800">
@@ -416,7 +417,7 @@ export default function InterviewPage() {
   // ── Interview Screen ──────────────────────────────────────────────
   if (step !== 'interview') return null
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#020617' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
       <Nav hasCV={!!cvText} />
 
       {/* Interview Header */}
@@ -506,38 +507,6 @@ export default function InterviewPage() {
   )
 }
 
-function Nav({ hasCV }: { hasCV: boolean }) {
-  return (
-    <nav className="flex items-center justify-between px-6 py-3.5 border-b border-slate-800 flex-shrink-0">
-      <Link href="/" className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-xl bg-indigo-500 flex items-center justify-center text-white font-black text-sm">J</div>
-        <span className="text-white font-bold">JobMate</span>
-      </Link>
-
-      <div className="hidden sm:flex items-center gap-1 text-xs">
-        <Link href="/cv" className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${hasCV ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'}`}>
-          <FileText className="w-3.5 h-3.5" />
-          {hasCV ? '✓ CV' : 'CV'}
-        </Link>
-        <ChevronRight className="w-3 h-3 text-slate-700" />
-        <Link href="/jobs" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 transition-colors">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
-          Jobs
-        </Link>
-        <ChevronRight className="w-3 h-3 text-slate-700" />
-        <Link href="/board" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 transition-colors">
-          <Kanban className="w-3.5 h-3.5" /> Board
-        </Link>
-        <ChevronRight className="w-3 h-3 text-slate-700" />
-        <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 font-medium">
-          <MessageSquare className="w-3.5 h-3.5" /> Interview üben
-        </span>
-      </div>
-
-      <Link href="/board" className="flex items-center gap-1.5 text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg transition-colors border border-slate-700">
-        <Kanban className="w-4 h-4" />
-        <span className="hidden sm:inline">Board</span>
-      </Link>
-    </nav>
-  )
+function Nav() {
+  return <JobNav />
 }

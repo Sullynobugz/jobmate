@@ -8,6 +8,7 @@ import {
 import { addJob, addToKanban, loadState, savePreferences } from '@/store/appStore'
 import type { Job, SearchPreferences, RemotePreference, JobSource } from '@/types'
 import Link from 'next/link'
+import { Nav } from '@/components/Nav'
 
 const SOURCE_META: Record<JobSource, { label: string; color: string; bg: string }> = {
   ba:        { label: 'Bundesagentur', color: 'text-blue-400',    bg: 'bg-blue-500/15 border-blue-500/30' },
@@ -136,44 +137,9 @@ export default function JobsPage() {
   const hasSearched = total !== null
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#020617' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
 
-      {/* Nav */}
-      <nav className="flex items-center justify-between px-6 py-3.5 border-b border-slate-800 flex-shrink-0">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-indigo-500 flex items-center justify-center text-white font-black text-sm">J</div>
-          <span className="text-white font-bold">JobMate</span>
-        </Link>
-
-        {/* Stepper */}
-        <div className="hidden sm:flex items-center gap-1 text-xs">
-          <Link href="/cv" className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${hasCV ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'}`}>
-            <FileText className="w-3.5 h-3.5" />
-            {hasCV ? '✓ CV' : 'CV verbessern'}
-          </Link>
-          <ChevronRight className="w-3 h-3 text-slate-700" />
-          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 font-medium">
-            <Search className="w-3.5 h-3.5" />
-            Jobs suchen
-          </span>
-          <ChevronRight className="w-3 h-3 text-slate-700" />
-          <Link href="/board" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 transition-colors">
-            <Kanban className="w-3.5 h-3.5" />
-            Board
-          </Link>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Link href="/interview" className="flex items-center gap-1.5 text-sm bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 px-3 py-1.5 rounded-lg transition-colors border border-indigo-500/30">
-            <MessageSquare className="w-4 h-4" />
-            <span className="hidden sm:inline">Üben</span>
-          </Link>
-          <Link href="/board" className="flex items-center gap-1.5 text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg transition-colors border border-slate-700">
-            <Kanban className="w-4 h-4" />
-            <span className="hidden sm:inline">Board</span>
-          </Link>
-        </div>
-      </nav>
+      <Nav />
 
       <div className="flex flex-1 overflow-hidden">
 

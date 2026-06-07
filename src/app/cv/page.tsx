@@ -5,6 +5,7 @@ import { Upload, Send, FileText, ArrowRight, Download, Search, Kanban, ChevronRi
 import { loadState, saveCV, saveChatHistory } from '@/store/appStore'
 import type { ChatMessage } from '@/types'
 import Link from 'next/link'
+import { Nav } from '@/components/Nav'
 
 type Mode = 'choice' | 'upload' | 'create' | 'improve'
 
@@ -181,13 +182,8 @@ export default function CVPage() {
   // ---- CHOICE SCREEN ----
   if (mode === 'choice') {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: '#020617' }}>
-        <nav className="flex items-center justify-between px-6 py-3.5 border-b border-slate-800">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-indigo-500 flex items-center justify-center text-white font-black text-sm">J</div>
-            <span className="text-white font-bold">JobMate</span>
-          </Link>
-        </nav>
+      <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
+        <Nav />
 
         <div className="flex-1 flex items-center justify-center px-6">
           <div className="w-full max-w-md">
@@ -239,49 +235,9 @@ export default function CVPage() {
   const chatDisabled = mode === 'improve' && !cvText
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#020617' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
 
-      {/* Nav */}
-      <nav className="flex items-center justify-between px-6 py-3.5 border-b border-slate-800">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-indigo-500 flex items-center justify-center text-white font-black text-sm">J</div>
-          <span className="text-white font-bold">JobMate</span>
-        </Link>
-
-        <div className="hidden sm:flex items-center gap-1 text-xs">
-          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 font-medium">
-            <FileText className="w-3.5 h-3.5" />
-            CV {isCreateMode ? 'erstellen' : 'verbessern'}
-          </span>
-          <ChevronRight className="w-3 h-3 text-slate-700" />
-          <Link href="/jobs" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 transition-colors">
-            <Search className="w-3.5 h-3.5" />
-            Jobs suchen
-          </Link>
-          <ChevronRight className="w-3 h-3 text-slate-700" />
-          <Link href="/board" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 transition-colors">
-            <Kanban className="w-3.5 h-3.5" />
-            Board
-          </Link>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {cvText && (
-            <button onClick={downloadCV} className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-3 py-1.5 rounded-lg border border-slate-700 hover:border-slate-500">
-              <Download className="w-4 h-4" />
-              <span className="hidden sm:inline">Download</span>
-            </button>
-          )}
-          <button onClick={resetCV} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-300 transition-colors px-3 py-1.5 rounded-lg border border-slate-800 hover:border-slate-700">
-            <Trash2 className="w-4 h-4" />
-            <span className="hidden sm:inline">Neu starten</span>
-          </button>
-          <Link href="/jobs" className="flex items-center gap-1.5 text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-lg transition-colors">
-            Jobs finden
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </nav>
+      <Nav />
 
       <div className="flex flex-1 overflow-hidden">
 

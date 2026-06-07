@@ -11,6 +11,7 @@ import {
   Star, X, Clock, ShieldCheck, Link2, HelpCircle,
 } from 'lucide-react'
 import Link from 'next/link'
+import { Nav } from '@/components/Nav'
 
 const COLUMNS: { id: KanbanColumn; label: string; color: string }[] = [
   { id: 'saved',     label: '🔖 Gemerkt',   color: 'slate' },
@@ -244,42 +245,9 @@ export default function BoardPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#020617' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
 
-      {/* Nav */}
-      <nav className="flex items-center justify-between px-6 py-3.5 border-b border-slate-800 flex-shrink-0">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-indigo-500 flex items-center justify-center text-white font-black text-sm">J</div>
-          <span className="text-white font-bold">JobMate</span>
-        </Link>
-
-        <div className="hidden sm:flex items-center gap-1 text-xs">
-          <Link href="/cv" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 transition-colors">
-            <FileText className="w-3.5 h-3.5" /> CV
-          </Link>
-          <ChevronRight className="w-3 h-3 text-slate-700" />
-          <Link href="/jobs" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-300 transition-colors">
-            <Search className="w-3.5 h-3.5" /> Jobs
-          </Link>
-          <ChevronRight className="w-3 h-3 text-slate-700" />
-          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 font-medium">
-            <Kanban className="w-3.5 h-3.5" /> Board
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {widCode && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs"
-              style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)' }}>
-              <Link2 className="w-3 h-3 text-indigo-400" />
-              <span className="text-indigo-300 font-mono">{widCode}</span>
-            </div>
-          )}
-          <Link href="/jobs" className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white border border-slate-700 hover:border-slate-500 px-3 py-1.5 rounded-lg transition-colors">
-            <Search className="w-4 h-4" />
-          </Link>
-        </div>
-      </nav>
+      <Nav />
 
       <div className="flex-1 overflow-x-auto p-6">
         <h1 className="text-2xl font-bold text-white mb-4">Bewerbungs-Board</h1>
