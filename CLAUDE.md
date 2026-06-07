@@ -64,9 +64,9 @@ JOOBLE_API_KEY=...
 
 ## Nächste Schritte
 1. **Recruiter-Pfad** implementieren: Stellenanforderungen hochladen, Kandidaten-Matching
-3. **Distanz-Radar**: Leaflet-Karte auf der Jobs-Seite mit km-Kreisen (Koordinaten liegen vor)
-4. **CV-Export**: Verbesserter Lebenslauf als PDF generieren (react-pdf)
-5. **Deployment**: Coolify → jobmate.techstag.de (GitHub-Push + neue Resource, ENV-Keys als Secrets)
+2. **Distanz-Radar**: Leaflet-Karte auf der Jobs-Seite mit km-Kreisen (Koordinaten liegen vor)
+3. **CV-Export**: Verbesserter Lebenslauf als PDF generieren (react-pdf)
+4. **Passwort-vergessen Supabase-URL** — `https://wid.techstag.de/auth/reset-password` in Supabase eintragen (Backlog)
 
 ## Backlog
 Leer — alle bekannten Features implementiert.
@@ -77,3 +77,5 @@ Leer — alle bekannten Features implementiert.
 | 2026-05-19 | Neustart als JobMate — zweiseitige Plattform, Next.js, Bewerber-MVP gebaut |
 | 2026-05-26 | 6 Job-Quellen (BA, Arbeitnow, Remotive, RemoteOK + opt. Adzuna/Jooble), Präferenzen-Sidebar (Wohnort, Radius, Remote, Jobtyp), Quellen-Filter, Distanzberechnung via Haversine, verbesserte Job-Cards mit Salary/Tags/Datum |
 | 2026-06-05 | Bewerbungsgespräch-Simulator: /interview Seite + /api/interview (Claude als HR-Manager), Web Speech API für Mikrofon, Feedback-Cards nach jeder Antwort (Stärken/Verbesserung/Note 1-5), Job aus gespeicherten Stellen wählbar |
+| 2026-06-07 | Interview-Vorbereitung: 3-Step-Flow (Setup → Leitfaden → Simulator), /api/interview-prep streamt strukturierten Leitfaden (Fragen, Stärken, Recruiter-Fragen, Strategie) |
+| 2026-06-07 | Live deployed: jobmate.techstag.de via Coolify (Hetzner), Webhook aktiv |
