@@ -25,11 +25,10 @@ Zweiseitige KI-Karriereplattform. Bewerber verbessern ihren Lebenslauf per Claud
 ```
 src/
 ├── app/
-│   ├── page.tsx              # Landing — Pfad-Auswahl (Bewerber / Recruiter)
-│   ├── cv/page.tsx           # CV hochladen + Claude-Chat
+│   ├── page.tsx              # Landing — Erklärung + "Hast du einen Lebenslauf?" (kein Recruiter-Pfad mehr)
+│   ├── cv/page.tsx           # CV-Upload + Claude-Chat (h-screen Layout, linke Spalte = Datei-Info)
 │   ├── jobs/page.tsx         # Job-Suche (BA + Arbeitnow)
 │   ├── board/page.tsx        # Kanban-Board (Drag & Drop)
-│   ├── recruiter/page.tsx    # Recruiter-Portal (Placeholder)
 │   └── api/
 │       ├── cv-chat/route.ts  # → Claude API (Streaming)
 │       ├── cv-parse/route.ts # PDF/TXT Text-Extraktion
@@ -40,10 +39,19 @@ src/
 └── types/index.ts            # Job, KanbanCard, CVData, AppState, etc.
 ```
 
+## ⚠️ CV-Seite Layout — h-screen
+`cv/page.tsx` verwendet `h-screen` (nicht `min-h-screen`) + `min-h-0` auf allen Flex-Kindern. Das ist zwingend damit der Chat-Input immer am unteren Rand bleibt ohne Scrollen. Nicht auf `min-h-screen` zurückstellen.
+
+## ⚠️ Linke Spalte — kein CV-Volltext
+Die linke Spalte (`w-2/5`) zeigt **nur Datei-Info** (Icon, Dateiname, Zeichenanzahl, Download-Button). Kein `<pre>`-Block mit CV-Text — der würde das Layout aufblähen und den Chat nach unten schieben. Volltext-Anzeige ist bewusst entfernt.
+
+## ⚠️ ?start= URL-Param
+`/cv?start=create` → startet Create-Mode direkt. `/cv?start=upload` → zeigt Upload-Dropzone direkt. Wird von der Landing-Page genutzt um den internen Choice-Screen zu überspringen.
+
 ## Bewerber-Flow
-1. **Landing** → "Ich suche einen Job" wählen
-2. **CV** → PDF/TXT hochladen → Text-Extraktion → Claude-Chat zum Verbessern → Download
-3. **Jobs** → Stichwort + Ort → BA API + Arbeitnow → Job merken (landet im Board)
+1. **Landing** → Erklärung + Frage "Hast du bereits einen Lebenslauf?" → Ja: `/cv?start=upload`, Nein: `/cv?start=create`
+2. **CV** → Upload/Erstellen → Claude-Chat → Download
+3. **Jobs** → Stichwort + Ort → BA API + Arbeitnow → Job merken
 4. **Board** → Kanban: Gemerkt → Beworben → Interview → Angebot / Absage
 
 ## Dev-Befehle
@@ -63,19 +71,15 @@ JOOBLE_API_KEY=...
 ```
 
 ## Nächste Schritte
-1. **Recruiter-Pfad** implementieren: Stellenanforderungen hochladen, Kandidaten-Matching
-2. **Distanz-Radar**: Leaflet-Karte auf der Jobs-Seite mit km-Kreisen (Koordinaten liegen vor)
-3. **CV-Export**: Verbesserter Lebenslauf als PDF generieren (react-pdf)
-4. **Passwort-vergessen Supabase-URL** — `https://wid.techstag.de/auth/reset-password` in Supabase eintragen (Backlog)
-
-## Backlog
-Leer — alle bekannten Features implementiert.
+1. **Distanz-Radar**: Leaflet-Karte auf der Jobs-Seite mit km-Kreisen (Koordinaten liegen vor)
+2. **CV-Export**: Verbesserter Lebenslauf als PDF generieren (react-pdf)
 
 ## Entwicklungslog
 | Datum | Was & Warum |
 |-------|-------------|
 | 2026-05-19 | Neustart als JobMate — zweiseitige Plattform, Next.js, Bewerber-MVP gebaut |
-| 2026-05-26 | 6 Job-Quellen (BA, Arbeitnow, Remotive, RemoteOK + opt. Adzuna/Jooble), Präferenzen-Sidebar (Wohnort, Radius, Remote, Jobtyp), Quellen-Filter, Distanzberechnung via Haversine, verbesserte Job-Cards mit Salary/Tags/Datum |
-| 2026-06-05 | Bewerbungsgespräch-Simulator: /interview Seite + /api/interview (Claude als HR-Manager), Web Speech API für Mikrofon, Feedback-Cards nach jeder Antwort (Stärken/Verbesserung/Note 1-5), Job aus gespeicherten Stellen wählbar |
-| 2026-06-07 | Interview-Vorbereitung: 3-Step-Flow (Setup → Leitfaden → Simulator), /api/interview-prep streamt strukturierten Leitfaden (Fragen, Stärken, Recruiter-Fragen, Strategie) |
-| 2026-06-07 | Live deployed: jobmate.techstag.de via Coolify (Hetzner), Webhook aktiv |
+| 2026-05-26 | 6 Job-Quellen (BA, Arbeitnow, Remotive, RemoteOK + opt. Adzuna/Jooble), Präferenzen-Sidebar, Distanzberechnung via Haversine |
+| 2026-06-05 | Bewerbungsgespräch-Simulator: /interview Seite + /api/interview (Claude als HR-Manager) |
+| 2026-06-07 | Interview-Vorbereitung: 3-Step-Flow, /api/interview-prep. Live deployed: jobmate.techstag.de |
+| 2026-06-07 | Recruiter-Pfad entfernt (verwirrt User). Neue Landing: Erklärung + CV-Frage → ?start=create/upload |
+| 2026-06-07 | h-screen Chat-Fix: Layout bleibt im Viewport. Linke Spalte zeigt nur Datei-Info (kein Volltext). Chat-Nachrichten mit Slide-In-Animation (CSS: chat-in-user / chat-in-bot) |
