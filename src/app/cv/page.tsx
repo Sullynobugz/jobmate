@@ -31,7 +31,8 @@ export default function CVPage() {
   const bottomRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const rawBufferRef = useRef('')
-  const animIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const streamingDivRef = useRef<HTMLDivElement>(null)
+  const rafRef = useRef<number | null>(null)
 
   useEffect(() => {
     const state = loadState()
@@ -109,10 +110,8 @@ export default function CVPage() {
     setMessages(newMessages)
     setInput('')
     setLoading(true)
-
     rawBufferRef.current = ''
-    let displayed = 0
-    if (animIntervalRef.current) clearInterval(animIntervalRef.current)
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
 
     try {
       const res = await fetch('/api/cv-chat', {
@@ -126,38 +125,53 @@ export default function CVPage() {
       })
 
       if (!res.body) return
+
+      // Leere Assistenten-Nachricht in State, React rendert den DOM-Node
+      setMessages(prev => [...prev, { role: 'assistant', content: '' }])
+      // Zwei rAF-Frames warten bis React den Node committed hat
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
+
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
-      setMessages(prev => [...prev, { role: 'assistant', content: '' }])
+      let displayed = 0
+      let streamDone = false
 
-      // Smooth typewriter: zeigt 5 Zeichen pro 16ms (~300 Zeichen/Sek)
-      animIntervalRef.current = setInterval(() => {
+      // rAF-Loop: direkte DOM-Manipulation, kein React-Re-render während Stream
+      const animate = () => {
         const raw = rawBufferRef.current
-        if (displayed >= raw.length) return
-        displayed = Math.min(displayed + 5, raw.length)
-        setMessages(prev => [
-          ...prev.slice(0, -1),
-          { role: 'assistant', content: raw.slice(0, displayed) },
-        ])
-      }, 16)
+        if (streamDone) {
+          // Stream fertig → Rest sofort anzeigen
+          if (streamingDivRef.current && displayed < raw.length) {
+            streamingDivRef.current.textContent = raw
+            displayed = raw.length
+            bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+          }
+          return
+        }
+        if (displayed < raw.length) {
+          displayed = Math.min(displayed + 5, raw.length)
+          if (streamingDivRef.current) {
+            streamingDivRef.current.textContent = raw.slice(0, displayed)
+            bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+          }
+        }
+        rafRef.current = requestAnimationFrame(animate)
+      }
+      rafRef.current = requestAnimationFrame(animate)
 
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
         rawBufferRef.current += decoder.decode(value, { stream: true })
       }
+      streamDone = true
 
-      // Warten bis Animation den Buffer aufgeholt hat
-      await new Promise<void>(resolve => {
-        const waitId = setInterval(() => {
-          if (displayed >= rawBufferRef.current.length) {
-            clearInterval(waitId)
-            resolve()
-          }
-        }, 16)
-      })
+      // Ein Frame warten damit animate() den finalen Text setzt
+      await new Promise(r => requestAnimationFrame(r))
 
+      // React-State einmalig auf Endtext setzen
       const finalText = rawBufferRef.current
+      setMessages(prev => [...prev.slice(0, -1), { role: 'assistant', content: finalText }])
       saveChatHistory([...newMessages, { role: 'assistant' as const, content: finalText }])
 
       if (mode === 'create') {
@@ -179,7 +193,7 @@ export default function CVPage() {
         })
       }
     } finally {
-      if (animIntervalRef.current) { clearInterval(animIntervalRef.current); animIntervalRef.current = null }
+      if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null }
       setLoading(false)
     }
   }
@@ -365,7 +379,10 @@ export default function CVPage() {
                       : 'bg-slate-800 text-slate-200 rounded-bl-sm'
                   }`}
                 >
-                  <div className="whitespace-pre-wrap">
+                  <div
+                    className="whitespace-pre-wrap"
+                    ref={loading && i === messages.length - 1 && msg.role === 'assistant' ? streamingDivRef : undefined}
+                  >
                     {msg.role === 'assistant' && isCreateMode
                       ? msg.content
                           .replace(new RegExp(`${CV_MARKER_START}[\\s\\S]*?${CV_MARKER_END}`, 'g'), '✅ *Lebenslauf gespeichert — sieh links!*')
