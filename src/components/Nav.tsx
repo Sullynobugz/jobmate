@@ -38,7 +38,7 @@ export function Nav() {
       <div className="flex items-center justify-between px-5 py-3">
         <Link href="/" className="flex items-center gap-2" style={{ textDecoration: 'none' }}>
           <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-sm"
-            style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
+            style={{ background: 'var(--primary)' }}>
             J
           </div>
           <div>
@@ -56,8 +56,8 @@ export function Nav() {
               <Link key={href} href={href}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
                 style={{
-                  background: active ? 'rgba(245,158,11,0.12)' : 'transparent',
-                  color: active ? 'var(--warning)' : 'var(--muted)',
+                  background: active ? 'rgba(79,70,229,0.08)' : 'transparent',
+                  color: active ? 'var(--primary)' : 'var(--muted)',
                   textDecoration: 'none',
                 }}>
                 <Icon className="w-3.5 h-3.5" />
@@ -72,7 +72,7 @@ export function Nav() {
             const active = pathname === href
             return (
               <Link key={href} href={href}
-                style={{ color: active ? 'var(--warning)' : 'var(--muted)' }}>
+                style={{ color: active ? 'var(--primary)' : 'var(--muted)' }}>
                 <Icon className="w-5 h-5" />
               </Link>
             )
