@@ -5,7 +5,7 @@ import {
   Search, MapPin, ExternalLink, Plus, Kanban, SlidersHorizontal,
   Wifi, Building2, Euro, Tag, Calendar, X, FileText, ChevronRight, MessageSquare,
 } from 'lucide-react'
-import { addJob, addToKanban, loadState, savePreferences } from '@/store/appStore'
+import { addJob, addToKanban, loadState, savePreferences, trackJobSavedToWid } from '@/store/appStore'
 import type { Job, SearchPreferences, RemotePreference, JobSource } from '@/types'
 import Link from 'next/link'
 import { Nav } from '@/components/Nav'
@@ -113,6 +113,7 @@ export default function JobsPage() {
   function saveJob(job: Job) {
     addJob(job)
     addToKanban(job.id, 'saved')
+    void trackJobSavedToWid(job)
     setAdded(prev => new Set(prev).add(job.id))
   }
 

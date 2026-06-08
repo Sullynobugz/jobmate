@@ -111,8 +111,7 @@ export function setWidCode(code: string) {
   save({ ...s, widCode: code.trim().toUpperCase() })
 }
 
-// Sendet Bewerbung an WID-Tracking-API (fire-and-forget)
-export async function trackApplicationToWid(job: Job, appliedAt: string, emailProof?: string) {
+async function sendWidEvent(type: 'job_saved' | 'application', data: Record<string, unknown>) {
   const widCode = getWidCode()
   if (!widCode) return
   try {
@@ -122,16 +121,29 @@ export async function trackApplicationToWid(job: Job, appliedAt: string, emailPr
       body: JSON.stringify({
         participantCode: widCode,
         app: 'jobmate',
-        type: 'application',
-        data: {
-          jobId: job.id,
-          jobTitle: job.title,
-          company: job.company,
-          jobUrl: job.url,
-          appliedAt,
-          emailProof: emailProof ?? null,
-        },
+        type,
+        data,
       }),
     })
   } catch { /* ignorieren — Tracking ist optional */ }
+}
+
+export async function trackJobSavedToWid(job: Job) {
+  await sendWidEvent('job_saved', {
+    jobId: job.id,
+    jobTitle: job.title,
+    company: job.company,
+    jobUrl: job.url,
+  })
+}
+
+export async function trackApplicationToWid(job: Job, appliedAt: string, emailProof?: string) {
+  await sendWidEvent('application', {
+    jobId: job.id,
+    jobTitle: job.title,
+    company: job.company,
+    jobUrl: job.url,
+    appliedAt,
+    emailProof: emailProof ?? null,
+  })
 }
