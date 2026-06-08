@@ -20,25 +20,6 @@
   --card:            #FFFFFF;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --primary:         #818CF8;
-    --primary-hover:   #6366F1;
-    --primary-subtle:  #1E1B4B;
-    --bg:              #0F172A;
-    --surface:         #1E293B;
-    --surface-2:       #334155;
-    --border:          #334155;
-    --text:            #F1F5F9;
-    --muted:           #94A3B8;
-    --success:         #22C55E;
-    --success-bg:      #052E16;
-    --danger:          #EF4444;
-    --danger-bg:       #450A0A;
-    --warning:         #F59E0B;
-    --card:            #1E293B;
-  }
-}
 
 /* ── Base ───────────────────────────────────────────────────── */
 
