@@ -45,6 +45,11 @@ export function saveChatHistory(history: ChatMessage[]) {
   save({ ...s, chatHistory: history })
 }
 
+export function clearCvSession() {
+  const s = loadState()
+  save({ ...s, cv: null, chatHistory: [] })
+}
+
 export function savePreferences(prefs: SearchPreferences) {
   const s = loadState()
   save({ ...s, preferences: prefs })

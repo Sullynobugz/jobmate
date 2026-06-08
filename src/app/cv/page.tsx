@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Upload, Send, FileText, ArrowRight, Download, Search, Kanban, ChevronRight, PlusCircle, Pencil, Trash2 } from 'lucide-react'
-import { loadState, saveCV, saveChatHistory, trackCvUpdatedToWid } from '@/store/appStore'
+import { clearCvSession, loadState, saveCV, saveChatHistory, trackCvUpdatedToWid } from '@/store/appStore'
 import type { ChatMessage } from '@/types'
 import Link from 'next/link'
 import { Nav } from '@/components/Nav'
@@ -232,8 +232,7 @@ export default function CVPage() {
     setMessages([])
     setMode('choice')
     setCvCreated(false)
-    saveChatHistory([])
-    saveCV({ raw: '', improved: '', filename: '', updatedAt: new Date().toISOString() })
+    clearCvSession()
   }
 
   // ---- CHOICE SCREEN ----
@@ -300,9 +299,20 @@ export default function CVPage() {
 
         {/* Left: CV Preview */}
         <div className="w-2/5 border-r border-slate-800 flex flex-col min-h-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2">
-            <FileText className="w-4 h-4 text-slate-400 flex-shrink-0" />
-            <span className="text-slate-400 text-sm font-medium">Lebenslauf</span>
+          <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <FileText className="w-4 h-4 text-slate-400 flex-shrink-0" />
+              <span className="text-slate-400 text-sm font-medium">Lebenslauf</span>
+            </div>
+            {(cvText || messages.length > 0) && (
+              <button
+                onClick={resetCV}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-red-300 border border-slate-800 hover:border-red-500/40 transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Zurücksetzen
+              </button>
+            )}
           </div>
           <input ref={fileRef} type="file" accept=".pdf,.docx,.doc,.txt,.rtf" className="hidden"
             onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
