@@ -11,12 +11,12 @@ import Link from 'next/link'
 import { Nav } from '@/components/Nav'
 
 const SOURCE_META: Record<JobSource, { label: string; color: string; bg: string }> = {
-  ba:        { label: 'Bundesagentur', color: 'text-blue-400',    bg: 'bg-blue-500/15 border-blue-500/30' },
-  arbeitnow: { label: 'Arbeitnow',    color: 'text-orange-400',  bg: 'bg-orange-500/15 border-orange-500/30' },
-  remotive:  { label: 'Remotive',     color: 'text-emerald-400', bg: 'bg-emerald-500/15 border-emerald-500/30' },
-  remoteok:  { label: 'RemoteOK',     color: 'text-teal-400',    bg: 'bg-teal-500/15 border-teal-500/30' },
-  adzuna:    { label: 'Adzuna',       color: 'text-violet-400',  bg: 'bg-violet-500/15 border-violet-500/30' },
-  jooble:    { label: 'Jooble',       color: 'text-yellow-400',  bg: 'bg-yellow-500/15 border-yellow-500/30' },
+  ba:        { label: 'Bundesagentur', color: 'text-blue-600',    bg: 'bg-blue-500/15 border-blue-500/30' },
+  arbeitnow: { label: 'Arbeitnow',    color: 'text-orange-600',  bg: 'bg-orange-500/15 border-orange-500/30' },
+  remotive:  { label: 'Remotive',     color: 'text-emerald-600', bg: 'bg-emerald-500/15 border-emerald-500/30' },
+  remoteok:  { label: 'RemoteOK',     color: 'text-teal-600',    bg: 'bg-teal-500/15 border-teal-500/30' },
+  adzuna:    { label: 'Adzuna',       color: 'text-violet-600',  bg: 'bg-violet-500/15 border-violet-500/30' },
+  jooble:    { label: 'Jooble',       color: 'text-yellow-700',  bg: 'bg-yellow-500/15 border-yellow-500/30' },
   manual:    { label: 'Manuell',      color: 'text-slate-400',   bg: 'bg-slate-500/15 border-slate-500/30' },
 }
 
@@ -145,12 +145,12 @@ export default function JobsPage() {
       <div className="flex flex-1 overflow-hidden">
 
         {/* ── Sidebar ── */}
-        <aside className={`flex-shrink-0 border-r border-slate-800 flex flex-col overflow-y-auto transition-all duration-200 ${filtersOpen ? 'w-64' : 'w-12'}`}>
+        <aside className={`flex-shrink-0 border-r border-gray-100 flex flex-col overflow-y-auto transition-all duration-200 ${filtersOpen ? 'w-64' : 'w-12'}`}>
 
           {/* Toggle */}
           <button
             onClick={() => setFiltersOpen(v => !v)}
-            className="flex items-center justify-center gap-2 px-4 py-3 border-b border-slate-800 text-slate-400 hover:text-white transition-colors w-full"
+            className="flex items-center justify-center gap-2 px-4 py-3 border-b border-gray-100 text-slate-400 hover:text-white transition-colors w-full"
             title={filtersOpen ? 'Filter einklappen' : 'Filter ausklappen'}
           >
             <SlidersHorizontal className="w-4 h-4 flex-shrink-0" />
@@ -170,7 +170,7 @@ export default function JobsPage() {
                     onChange={e => updatePref('location', e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && search()}
                     placeholder="Stadt oder PLZ"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                    className="w-full bg-slate-50 border border-gray-200 rounded-xl pl-9 pr-3 py-2 text-gray-900 placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
                   />
                 </div>
               </div>
@@ -179,7 +179,7 @@ export default function JobsPage() {
               {prefs.remote !== 'remote' && (
                 <div>
                   <label className="text-xs text-slate-500 font-medium uppercase tracking-wide mb-2 block">
-                    Umkreis — <span className="text-indigo-400">{prefs.radius} km</span>
+                    Umkreis — <span className="text-indigo-600">{prefs.radius} km</span>
                   </label>
                   <div className="flex gap-1 flex-wrap">
                     {RADII.map(r => (
@@ -189,7 +189,7 @@ export default function JobsPage() {
                         className={`text-xs px-2 py-1 rounded-lg border transition-all ${
                           prefs.radius === r
                             ? 'bg-indigo-600 border-indigo-500 text-white'
-                            : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500'
+                            : 'bg-slate-50 border-gray-200 text-slate-400 hover:border-slate-500'
                         }`}
                       >
                         {r}
@@ -213,8 +213,8 @@ export default function JobsPage() {
                       onClick={() => updatePref('remote', opt.id)}
                       className={`flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg border transition-all text-left ${
                         prefs.remote === opt.id
-                          ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300'
-                          : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-300'
+                          ? 'bg-indigo-600/20 border-indigo-500 text-indigo-600'
+                          : 'bg-slate-50/50 border-gray-200 text-slate-400 hover:border-slate-500 hover:text-slate-700'
                       }`}
                     >
                       {opt.icon}
@@ -235,7 +235,7 @@ export default function JobsPage() {
                       className={`text-xs px-2 py-1 rounded-lg border transition-all ${
                         prefs.jobTypes.includes(t.id)
                           ? 'bg-indigo-600 border-indigo-500 text-white'
-                          : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500'
+                          : 'bg-slate-50 border-gray-200 text-slate-400 hover:border-slate-500'
                       }`}
                     >
                       {t.label}
@@ -259,18 +259,18 @@ export default function JobsPage() {
                           className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg border text-xs transition-all ${
                             active
                               ? `${meta.bg} ${meta.color}`
-                              : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-600'
+                              : 'bg-slate-50/50 border-gray-200 text-slate-400 hover:border-slate-600'
                           }`}
                         >
                           <span>{meta.label}</span>
-                          <span className="bg-slate-700/60 px-1.5 py-0.5 rounded-md text-slate-300">{count}</span>
+                          <span className="bg-slate-700/60 px-1.5 py-0.5 rounded-md text-slate-700">{count}</span>
                         </button>
                       )
                     })}
                     {activeSources.size > 0 && (
                       <button
                         onClick={() => setActiveSources(new Set())}
-                        className="w-full flex items-center justify-center gap-1 text-xs text-slate-500 hover:text-slate-300 py-1 transition-colors"
+                        className="w-full flex items-center justify-center gap-1 text-xs text-slate-500 hover:text-slate-700 py-1 transition-colors"
                       >
                         <X className="w-3 h-3" /> Alle anzeigen
                       </button>
@@ -286,7 +286,7 @@ export default function JobsPage() {
         <main className="flex-1 flex flex-col overflow-hidden">
 
           {/* Suchleiste */}
-          <div className="px-5 py-4 border-b border-slate-800 flex-shrink-0">
+          <div className="px-5 py-4 border-b border-gray-100 flex-shrink-0">
             <div className="flex gap-2">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -296,7 +296,7 @@ export default function JobsPage() {
                   onChange={e => setQuery(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && search()}
                   placeholder="Jobtitel, Skill oder Bereich..."
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                  className="w-full bg-slate-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-gray-900 placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
                 />
               </div>
               <button
@@ -311,8 +311,8 @@ export default function JobsPage() {
             {/* Status-Zeile */}
             {hasSearched && !loading && (
               <p className="text-slate-500 text-xs mt-2">
-                <span className="text-slate-300 font-medium">{total}</span> Jobs gefunden
-                {activeSources.size > 0 && <> · <span className="text-indigo-400">{displayedJobs.length} gefiltert</span></>}
+                <span className="text-slate-700 font-medium">{total}</span> Jobs gefunden
+                {activeSources.size > 0 && <> · <span className="text-indigo-600">{displayedJobs.length} gefiltert</span></>}
                 {prefs.location && prefs.remote !== 'remote' && ` · ${prefs.radius} km um ${prefs.location}`}
               </p>
             )}
@@ -337,7 +337,7 @@ export default function JobsPage() {
             {!loading && !hasSearched && (
               <div className="flex flex-col items-center justify-center py-16 text-center max-w-sm mx-auto">
                 <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-5">
-                  <Search className="w-6 h-6 text-indigo-400" />
+                  <Search className="w-6 h-6 text-indigo-600" />
                 </div>
                 <p className="text-white font-semibold text-lg mb-1">Jobs finden</p>
                 <p className="text-slate-500 text-sm mb-6 leading-relaxed">
@@ -352,7 +352,7 @@ export default function JobsPage() {
                       <button
                         key={q}
                         onClick={() => { setQuery(q); search(q) }}
-                        className="text-sm text-slate-400 hover:text-white border border-slate-700 hover:border-indigo-500 hover:bg-indigo-500/10 px-3 py-1.5 rounded-xl transition-all"
+                        className="text-sm text-slate-400 hover:text-white border border-gray-200 hover:border-indigo-500 hover:bg-indigo-500/10 px-3 py-1.5 rounded-xl transition-all"
                       >
                         {q}
                       </button>
@@ -361,7 +361,7 @@ export default function JobsPage() {
                 </div>
 
                 {!hasCV && (
-                  <div className="mt-8 w-full p-4 rounded-2xl border border-slate-800 bg-slate-900/50">
+                  <div className="mt-8 w-full p-4 rounded-2xl border border-gray-100 bg-white/80">
                     <p className="text-slate-400 text-sm mb-3">Hast du deinen Lebenslauf dabei?</p>
                     <Link
                       href="/cv"
@@ -391,7 +391,7 @@ export default function JobsPage() {
                 return (
                   <div
                     key={job.id}
-                    className="bg-slate-900 border border-slate-800 rounded-2xl p-4 hover:border-slate-600 transition-all group"
+                    className="bg-white border border-gray-100 rounded-2xl p-4 hover:border-slate-600 transition-all group"
                   >
                     <div className="flex items-start gap-3">
                       <div className="flex-1 min-w-0">
@@ -402,12 +402,12 @@ export default function JobsPage() {
                             {meta.label}
                           </span>
                           {job.remote && (
-                            <span className="flex items-center gap-1 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                            <span className="flex items-center gap-1 text-xs text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
                               <Wifi className="w-3 h-3" /> Remote
                             </span>
                           )}
                           {job.jobType && (
-                            <span className="text-xs text-slate-400 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full">
+                            <span className="text-xs text-slate-400 bg-slate-50 border border-gray-200 px-2 py-0.5 rounded-full">
                               {job.jobType}
                             </span>
                           )}
@@ -424,7 +424,7 @@ export default function JobsPage() {
                         </div>
 
                         {/* Titel */}
-                        <h3 className="text-white font-semibold text-sm leading-snug mb-0.5 group-hover:text-indigo-300 transition-colors">
+                        <h3 className="text-white font-semibold text-sm leading-snug mb-0.5 group-hover:text-indigo-600 transition-colors">
                           {job.title}
                         </h3>
                         <p className="text-slate-400 text-xs mb-0.5">{job.company}</p>
@@ -442,7 +442,7 @@ export default function JobsPage() {
                         {/* Meta */}
                         <div className="flex items-center gap-3 flex-wrap">
                           {job.salary && (
-                            <span className="flex items-center gap-1 text-xs text-emerald-400">
+                            <span className="flex items-center gap-1 text-xs text-emerald-600">
                               <Euro className="w-3 h-3" /> {job.salary}
                             </span>
                           )}
@@ -450,7 +450,7 @@ export default function JobsPage() {
                             <div className="flex items-center gap-1 flex-wrap">
                               <Tag className="w-3 h-3 text-slate-700" />
                               {job.tags.slice(0, 3).map(tag => (
-                                <span key={tag} className="text-xs text-slate-500 bg-slate-800 px-1.5 py-0.5 rounded">
+                                <span key={tag} className="text-xs text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded">
                                   {tag}
                                 </span>
                               ))}
@@ -465,7 +465,7 @@ export default function JobsPage() {
                           href={job.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white border border-slate-700 hover:border-slate-500 px-3 py-1.5 rounded-lg transition-colors"
+                          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white border border-gray-200 hover:border-slate-500 px-3 py-1.5 rounded-lg transition-colors"
                         >
                           <ExternalLink className="w-3 h-3" /> Öffnen
                         </a>
@@ -474,7 +474,7 @@ export default function JobsPage() {
                           disabled={isSaved}
                           className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-colors ${
                             isSaved
-                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                              ? 'bg-emerald-500/20 text-emerald-600 border border-emerald-500/30'
                               : 'bg-indigo-600 hover:bg-indigo-500 text-white'
                           }`}
                         >
@@ -483,7 +483,7 @@ export default function JobsPage() {
                         {isSaved && (
                           <Link
                             href="/interview"
-                            className="flex items-center gap-1.5 text-xs text-indigo-400 bg-indigo-600/15 hover:bg-indigo-600/25 border border-indigo-500/25 px-3 py-1.5 rounded-lg transition-colors"
+                            className="flex items-center gap-1.5 text-xs text-indigo-600 bg-indigo-600/15 hover:bg-indigo-600/25 border border-indigo-500/25 px-3 py-1.5 rounded-lg transition-colors"
                           >
                             <MessageSquare className="w-3 h-3" /> Üben
                           </Link>

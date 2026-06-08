@@ -10,7 +10,6 @@ export default function Home() {
   const [widLinked, setWidLinked] = useState(false)
 
   useEffect(() => {
-    // ?wid= param von WID abspeichern
     const params = new URLSearchParams(window.location.search)
     const wid = params.get('wid')
     if (wid) {
@@ -20,7 +19,6 @@ export default function Home() {
       window.history.replaceState({}, '', url.toString())
     }
 
-    // Wiederkehrender Nutzer mit gespeichertem Lebenslauf → direkt zur CV-Seite
     const state = loadState()
     setWidLinked(!!state.widCode || !!wid)
     if (state.cv?.raw) {
@@ -34,84 +32,97 @@ export default function Home() {
 
       {/* Logo */}
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-11 h-11 rounded-xl flex items-center justify-center font-black text-white text-xl bg-indigo-600">
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center font-black text-white text-xl"
+          style={{ background: 'var(--primary)' }}>
           J
         </div>
-        <span className="text-3xl font-black tracking-tight text-white">JobMate</span>
+        <div>
+          <span className="text-3xl font-black tracking-tight" style={{ color: 'var(--text)' }}>JobMate</span>
+          <p className="text-[10px] leading-none mt-0.5" style={{ color: 'var(--muted)' }}>WID · Linguu · JobMate</p>
+        </div>
       </div>
 
-      <p className="text-slate-400 text-base text-center mb-10">
+      <p className="text-base text-center mb-10" style={{ color: 'var(--muted)' }}>
         Dein KI-Assistent für die Jobsuche in Deutschland
       </p>
 
       {widLinked && (
         <div className="mb-8 flex items-center gap-2 px-4 py-2 rounded-full border"
-          style={{ background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.25)', color: '#f59e0b' }}>
+          style={{ background: 'var(--primary-subtle)', borderColor: 'rgba(79,70,229,0.25)', color: 'var(--primary)' }}>
           <ShieldCheck className="w-4 h-4" />
           <span className="text-sm font-semibold">Teil deines WID-Integrationsprogramms</span>
         </div>
       )}
 
-      {/* Was JobMate macht */}
+      {/* Feature-Karten */}
       <div className="flex flex-col gap-2.5 mb-12 w-full max-w-sm">
         {[
-          { icon: FileText, label: 'Lebenslauf verbessern', sub: 'Claude analysiert und optimiert deinen CV auf Deutsch' },
-          { icon: Search, label: 'Passende Jobs finden', sub: 'Bundesagentur für Arbeit und weitere Quellen' },
-          { icon: LayoutGrid, label: 'Bewerbungen tracken', sub: 'Kanban-Board — wer hat geantwortet, wer nicht' },
-        ].map(({ icon: Icon, label, sub }) => (
-          <div key={label} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900 border border-slate-800">
-            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center shrink-0">
-              <Icon className="w-4 h-4 text-indigo-400" />
+          { icon: FileText,   label: 'Lebenslauf verbessern', sub: 'Claude analysiert und optimiert deinen CV auf Deutsch', color: 'var(--primary)' },
+          { icon: Search,     label: 'Passende Jobs finden',  sub: 'Bundesagentur für Arbeit und weitere Quellen',          color: '#10b981' },
+          { icon: LayoutGrid, label: 'Bewerbungen tracken',   sub: 'Kanban-Board — wer hat geantwortet, wer nicht',         color: '#f59e0b' },
+        ].map(({ icon: Icon, label, sub, color }) => (
+          <div key={label} className="card flex items-center gap-3 py-3">
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+              style={{ background: `${color}15` }}>
+              <Icon className="w-4 h-4" style={{ color }} />
             </div>
             <div>
-              <p className="text-white text-sm font-medium">{label}</p>
-              <p className="text-slate-500 text-xs leading-snug">{sub}</p>
+              <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{label}</p>
+              <p className="text-xs leading-snug" style={{ color: 'var(--muted)' }}>{sub}</p>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Die Frage */}
+      {/* Einstiegsfrage */}
       <div className="w-full max-w-sm">
-        <p className="text-white text-center font-bold text-xl mb-1">
+        <p className="font-bold text-xl text-center mb-1" style={{ color: 'var(--text)' }}>
           Hast du bereits einen Lebenslauf?
         </p>
-        <p className="text-slate-500 text-sm text-center mb-6">
+        <p className="text-sm text-center mb-6" style={{ color: 'var(--muted)' }}>
           Das bestimmt, wie wir starten
         </p>
 
         <div className="flex flex-col gap-3">
           <button
             onClick={() => router.push('/cv?start=upload')}
-            className="w-full flex items-center gap-4 p-5 rounded-2xl border border-slate-700 hover:border-indigo-500 bg-slate-900/50 hover:bg-slate-800/50 transition-all group text-left cursor-pointer"
+            className="w-full flex items-center gap-4 p-5 rounded-2xl border transition-all text-left cursor-pointer"
+            style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
+            onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--primary)')}
+            onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
           >
-            <div className="w-11 h-11 rounded-xl bg-indigo-500/10 flex items-center justify-center shrink-0 group-hover:bg-indigo-500/20 transition-colors">
-              <Upload className="w-5 h-5 text-indigo-400" />
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: 'var(--primary-subtle)' }}>
+              <Upload className="w-5 h-5" style={{ color: 'var(--primary)' }} />
             </div>
             <div className="flex-1">
-              <p className="text-white font-semibold">Ja, ich habe einen</p>
-              <p className="text-slate-400 text-sm">Hochladen — dann gemeinsam verbessern</p>
+              <p className="font-semibold" style={{ color: 'var(--text)' }}>Ja, ich habe einen</p>
+              <p className="text-sm" style={{ color: 'var(--muted)' }}>Hochladen — dann gemeinsam verbessern</p>
             </div>
-            <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-indigo-400 transition-colors" />
+            <ChevronRight className="w-5 h-5" style={{ color: 'var(--muted)' }} />
           </button>
 
           <button
             onClick={() => router.push('/cv?start=create')}
-            className="w-full flex items-center gap-4 p-5 rounded-2xl border border-slate-700 hover:border-emerald-500 bg-slate-900/50 hover:bg-slate-800/50 transition-all group text-left cursor-pointer"
+            className="w-full flex items-center gap-4 p-5 rounded-2xl border transition-all text-left cursor-pointer"
+            style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
+            onMouseEnter={e => (e.currentTarget.style.borderColor = '#10b981')}
+            onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
           >
-            <div className="w-11 h-11 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/20 transition-colors">
-              <PlusCircle className="w-5 h-5 text-emerald-400" />
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: 'rgba(16,185,129,0.1)' }}>
+              <PlusCircle className="w-5 h-5 text-emerald-600" />
             </div>
             <div className="flex-1">
-              <p className="text-white font-semibold">Noch nicht</p>
-              <p className="text-slate-400 text-sm">KI führt dich Schritt für Schritt durch die Erstellung</p>
+              <p className="font-semibold" style={{ color: 'var(--text)' }}>Noch nicht</p>
+              <p className="text-sm" style={{ color: 'var(--muted)' }}>KI führt dich Schritt für Schritt durch die Erstellung</p>
             </div>
-            <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-emerald-400 transition-colors" />
+            <ChevronRight className="w-5 h-5" style={{ color: 'var(--muted)' }} />
           </button>
         </div>
       </div>
 
-      <p className="mt-10 text-xs text-slate-700">
+      <p className="mt-10 text-xs" style={{ color: 'var(--muted)', opacity: 0.6 }}>
         Keine Registrierung · Alles lokal im Browser gespeichert
       </p>
     </main>

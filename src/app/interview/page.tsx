@@ -36,18 +36,18 @@ function parseFeedback(text: string): { clean: string; feedback: FeedbackData | 
 
 function FeedbackCard({ feedback }: { feedback: FeedbackData }) {
   return (
-    <div className="mt-2 rounded-xl border border-slate-700 bg-slate-800/60 p-3 space-y-2 text-xs">
+    <div className="mt-2 rounded-xl border border-gray-200 bg-white p-3 space-y-2 text-xs">
       <div className="flex items-start gap-2">
-        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 mt-0.5 flex-shrink-0" />
-        <span className="text-slate-300"><span className="text-emerald-400 font-medium">Stärke:</span> {feedback.strengths}</span>
+        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 mt-0.5 flex-shrink-0" />
+        <span className="text-slate-700"><span className="text-emerald-600 font-medium">Stärke:</span> {feedback.strengths}</span>
       </div>
       <div className="flex items-start gap-2">
         <TrendingUp className="w-3.5 h-3.5 text-amber-400 mt-0.5 flex-shrink-0" />
-        <span className="text-slate-300"><span className="text-amber-400 font-medium">Verbesserung:</span> {feedback.improvement}</span>
+        <span className="text-slate-700"><span className="text-amber-400 font-medium">Verbesserung:</span> {feedback.improvement}</span>
       </div>
       <div className="flex items-center gap-1.5">
         {Array.from({ length: 5 }).map((_, i) => (
-          <Star key={i} className={`w-3.5 h-3.5 ${i < feedback.rating ? 'text-yellow-400 fill-yellow-400' : 'text-slate-600'}`} />
+          <Star key={i} className={`w-3.5 h-3.5 ${i < feedback.rating ? 'text-yellow-700 fill-yellow-400' : 'text-slate-600'}`} />
         ))}
         <span className="text-slate-500 ml-1">{feedback.rating}/5</span>
       </div>
@@ -81,10 +81,10 @@ function JobSelector({ jobs, selected, onSelect }: {
                 className={`w-full text-left px-4 py-3 rounded-xl border transition-all ${
                   selected?.id === job.id
                     ? 'border-indigo-500 bg-indigo-500/10'
-                    : 'border-slate-700 bg-slate-900 hover:border-slate-600'
+                    : 'border-gray-200 bg-white hover:border-slate-600'
                 }`}
               >
-                <p className="text-sm font-medium text-white leading-snug">{job.title}</p>
+                <p className="text-sm font-medium text-gray-900 leading-snug">{job.title}</p>
                 {job.company && <p className="text-xs text-slate-400 mt-0.5">{job.company}</p>}
               </button>
             ))}
@@ -94,7 +94,7 @@ function JobSelector({ jobs, selected, onSelect }: {
 
       <button
         onClick={() => setShowCustom(v => !v)}
-        className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="text-xs text-slate-500 hover:text-slate-700 transition-colors"
       >
         {showCustom ? '↑ Einklappen' : '+ Stelle manuell eingeben'}
       </button>
@@ -106,7 +106,7 @@ function JobSelector({ jobs, selected, onSelect }: {
             onChange={e => setCustom(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && applyCustom()}
             placeholder="z.B. Softwareentwickler @ Google"
-            className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+            className="flex-1 bg-slate-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
           />
           <button
             onClick={applyCustom}
@@ -129,18 +129,18 @@ function PrepGuide({ text }: { text: string }) {
         const body = rest.join('\n').trim()
         const lines = body.split('\n').filter(Boolean)
         return (
-          <div key={i} className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
-            <h3 className="text-sm font-semibold text-white mb-3">{headline.trim()}</h3>
+          <div key={i} className="rounded-2xl border border-gray-100 bg-slate-900/60 p-5">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">{headline.trim()}</h3>
             <div className="space-y-2">
               {lines.map((line, j) => {
                 const clean = line.replace(/^[-*•]\s*/, '').replace(/^\d+\.\s*/, '')
                 const isBullet = /^[-*•]/.test(line) || /^\d+\./.test(line)
                 if (line.startsWith('**') || line.startsWith('###')) {
-                  return <p key={j} className="text-xs font-semibold text-indigo-400 mt-3">{clean.replace(/\*\*/g, '')}</p>
+                  return <p key={j} className="text-xs font-semibold text-indigo-600 mt-3">{clean.replace(/\*\*/g, '')}</p>
                 }
                 if (isBullet) {
                   return (
-                    <div key={j} className="flex gap-2 text-xs text-slate-300 leading-relaxed">
+                    <div key={j} className="flex gap-2 text-xs text-slate-700 leading-relaxed">
                       <span className="text-indigo-500 mt-0.5 flex-shrink-0">›</span>
                       <span>{clean.replace(/\*\*/g, '').replace(/\*/g, '')}</span>
                     </div>
@@ -319,29 +319,29 @@ export default function InterviewPage() {
           <div className="w-full max-w-lg space-y-6">
             <div className="text-center space-y-2">
               <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto mb-4">
-                <MessageSquare className="w-7 h-7 text-indigo-400" />
+                <MessageSquare className="w-7 h-7 text-indigo-600" />
               </div>
-              <h1 className="text-2xl font-bold text-white">Interview-Vorbereitung</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Interview-Vorbereitung</h1>
               <p className="text-slate-400 text-sm leading-relaxed">
                 KI analysiert die Stelle, bereitet dich vor — dann übst du das Gespräch.
               </p>
             </div>
 
             {cvText && (
-              <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/8 text-xs text-emerald-400">
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/8 text-xs text-emerald-600">
                 <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
                 CV geladen — wird als Kontext verwendet
               </div>
             )}
 
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 space-y-4">
+            <div className="rounded-2xl border border-gray-100 bg-slate-900/60 p-5 space-y-4">
               <JobSelector jobs={savedJobs} selected={selectedJob} onSelect={setSelectedJob} />
             </div>
 
             {savedJobs.length === 0 && !selectedJob && (
               <p className="text-xs text-slate-600 text-center">
                 Noch keine gespeicherten Stellen.{' '}
-                <Link href="/jobs" className="text-indigo-400 hover:underline">Jobs suchen →</Link>
+                <Link href="/jobs" className="text-indigo-600 hover:underline">Jobs suchen →</Link>
               </p>
             )}
 
@@ -357,7 +357,7 @@ export default function InterviewPage() {
               <button
                 onClick={startInterview}
                 disabled={!selectedJob}
-                className="w-full py-3 rounded-2xl text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed border border-slate-700 text-slate-400 hover:text-white hover:border-slate-500 flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-2xl text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed border border-gray-200 text-slate-400 hover:text-white hover:border-slate-500 flex items-center justify-center gap-2"
               >
                 <PlayCircle className="w-4 h-4" />
                 Direkt zum Gespräch
@@ -374,12 +374,12 @@ export default function InterviewPage() {
     return (
       <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
         <Nav />
-        <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-800 bg-slate-900/50">
-          <button onClick={() => setStep('setup')} className="p-1.5 text-slate-500 hover:text-white transition-colors rounded-lg hover:bg-slate-800">
+        <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-100 bg-white/80">
+          <button onClick={() => setStep('setup')} className="p-1.5 text-slate-500 hover:text-white transition-colors rounded-lg hover:bg-slate-50">
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-white">{selectedJob?.title}</p>
+            <p className="text-sm font-semibold text-gray-900">{selectedJob?.title}</p>
             {selectedJob?.company && <p className="text-xs text-slate-500">{selectedJob.company}</p>}
           </div>
           <button
@@ -421,20 +421,20 @@ export default function InterviewPage() {
       <Nav />
 
       {/* Interview Header */}
-      <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-800 bg-slate-900/50">
-        <button onClick={reset} className="p-1.5 text-slate-500 hover:text-white transition-colors rounded-lg hover:bg-slate-800">
+      <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-100 bg-white/80">
+        <button onClick={reset} className="p-1.5 text-slate-500 hover:text-white transition-colors rounded-lg hover:bg-slate-50">
           <ArrowLeft className="w-4 h-4" />
         </button>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-white truncate">{selectedJob?.title}</p>
+          <p className="text-sm font-semibold text-gray-900 truncate">{selectedJob?.title}</p>
           {selectedJob?.company && <p className="text-xs text-slate-500">{selectedJob.company}</p>}
         </div>
         {questionCount > 0 && (
-          <span className="text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded-lg">
+          <span className="text-xs text-slate-500 bg-slate-50 px-2 py-1 rounded-lg">
             {questionCount} {questionCount === 1 ? 'Frage' : 'Fragen'} beantwortet
           </span>
         )}
-        <button onClick={reset} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-white transition-colors px-2 py-1.5 rounded-lg hover:bg-slate-800">
+        <button onClick={reset} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-white transition-colors px-2 py-1.5 rounded-lg hover:bg-slate-50">
           <RefreshCw className="w-3.5 h-3.5" /> Neu
         </button>
       </div>
@@ -447,7 +447,7 @@ export default function InterviewPage() {
               {msg.role === 'assistant' && (
                 <div className="flex items-center gap-1.5 mb-0.5">
                   <div className="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center">
-                    <Briefcase className="w-3 h-3 text-white" />
+                    <Briefcase className="w-3 h-3 text-gray-900" />
                   </div>
                   <span className="text-xs text-slate-500">HR-Manager</span>
                 </div>
@@ -455,7 +455,7 @@ export default function InterviewPage() {
               <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                 msg.role === 'user'
                   ? 'bg-indigo-600 text-white rounded-br-sm'
-                  : 'bg-slate-800 text-slate-100 rounded-bl-sm'
+                  : 'bg-slate-50 text-slate-100 rounded-bl-sm'
               }`}>
                 {msg.content || (loading && i === messages.length - 1
                   ? <span className="flex gap-1">{[0,1,2].map(d => <span key={d} className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: `${d * 150}ms` }} />)}</span>
@@ -470,15 +470,15 @@ export default function InterviewPage() {
       </div>
 
       {/* Input */}
-      <div className="border-t border-slate-800 bg-slate-900/80 px-4 py-3">
+      <div className="border-t border-gray-100 bg-slate-900/80 px-4 py-3">
         <div className="flex gap-2 items-end max-w-3xl mx-auto">
           {speechSupported && (
             <button
               onClick={toggleMic}
               className={`flex-shrink-0 p-2.5 rounded-xl border transition-all ${
                 recording
-                  ? 'bg-red-600 border-red-500 text-white animate-pulse'
-                  : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white'
+                  ? 'bg-red-600 border-red-500 text-gray-900 animate-pulse'
+                  : 'bg-slate-50 border-gray-200 text-slate-400 hover:border-slate-500 hover:text-white'
               }`}
               title={recording ? 'Aufnahme stoppen' : 'Spracheingabe'}
             >
@@ -491,7 +491,7 @@ export default function InterviewPage() {
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
             placeholder={recording ? 'Aufnahme läuft…' : 'Deine Antwort — oder Mikrofon nutzen…'}
             rows={2}
-            className="flex-1 resize-none bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+            className="flex-1 resize-none bg-slate-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
           />
           <button
             onClick={handleSend}

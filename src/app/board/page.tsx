@@ -22,11 +22,11 @@ const COLUMNS: { id: KanbanColumn; label: string; color: string }[] = [
 ]
 
 const colBorder: Record<string, string> = {
-  slate: 'border-slate-700', blue: 'border-blue-700/50',
+  slate: 'border-gray-200', blue: 'border-blue-700/50',
   indigo: 'border-indigo-700/50', emerald: 'border-emerald-700/50', red: 'border-red-700/50',
 }
 const colBg: Record<string, string> = {
-  slate: 'bg-slate-800/40', blue: 'bg-blue-900/20',
+  slate: 'bg-slate-50', blue: 'bg-blue-900/20',
   indigo: 'bg-indigo-900/20', emerald: 'bg-emerald-900/20', red: 'bg-red-900/20',
 }
 
@@ -44,7 +44,7 @@ function ApplicationModal({ job, onConfirm, onCancel }: ApplicationModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+      <div className="bg-white border border-gray-200 rounded-2xl p-6 w-full max-w-md shadow-2xl">
         <div className="flex items-start justify-between mb-4">
           <div>
             <h3 className="text-white font-bold text-lg">Bewerbung bestätigen</h3>
@@ -58,9 +58,9 @@ function ApplicationModal({ job, onConfirm, onCancel }: ApplicationModalProps) {
         {/* Zeitstempel */}
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg mb-4"
           style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)' }}>
-          <Clock className="w-4 h-4 text-indigo-400 flex-shrink-0" />
+          <Clock className="w-4 h-4 text-indigo-600 flex-shrink-0" />
           <div>
-            <p className="text-xs text-indigo-300 font-medium">Bewerbungszeitstempel wird gespeichert</p>
+            <p className="text-xs text-indigo-600 font-medium">Bewerbungszeitstempel wird gespeichert</p>
             <p className="text-xs text-slate-400">{new Date().toLocaleString('de-DE')}</p>
           </div>
         </div>
@@ -68,19 +68,19 @@ function ApplicationModal({ job, onConfirm, onCancel }: ApplicationModalProps) {
         {/* E-Mail Nachweis (optional) */}
         <div className="mb-4">
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-sm text-slate-300 font-medium">
+            <label className="text-sm text-slate-700 font-medium">
               E-Mail Betreff <span className="text-slate-500 font-normal">(optional)</span>
             </label>
             <button onClick={() => setShowTutorial(t => !t)}
-              className="text-slate-500 hover:text-slate-300">
+              className="text-slate-500 hover:text-slate-700">
               <HelpCircle className="w-4 h-4" />
             </button>
           </div>
 
           {showTutorial && (
-            <div className="mb-2 px-3 py-2.5 rounded-lg text-xs text-slate-300"
+            <div className="mb-2 px-3 py-2.5 rounded-lg text-xs text-slate-700"
               style={{ background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(99,102,241,0.3)' }}>
-              <p className="font-semibold text-indigo-300 mb-1">Warum ist das wichtig?</p>
+              <p className="font-semibold text-indigo-600 mb-1">Warum ist das wichtig?</p>
               <p className="mb-1">
                 Dein Koordinator kann auf Anfrage nachfragen ob du dich wirklich beworben hast.
                 Der Betreff deiner Bewerbungs-E-Mail ist ein einfacher Nachweis.
@@ -96,7 +96,7 @@ function ApplicationModal({ job, onConfirm, onCancel }: ApplicationModalProps) {
             value={emailProof}
             onChange={e => setEmailProof(e.target.value)}
             placeholder='z.B. "Bewerbung als Verkäufer – Anna Schmidt"'
-            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+            className="w-full bg-slate-50 border border-gray-200 rounded-xl px-3 py-2.5 text-gray-900 text-sm placeholder-slate-500 focus:outline-none focus:border-indigo-500"
           />
         </div>
 
@@ -129,16 +129,16 @@ function WidCodeBanner({ onLink }: { onLink: (code: string) => void }) {
   return (
     <div className="mb-5 rounded-xl px-4 py-3 flex items-center gap-3"
       style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)' }}>
-      <Link2 className="w-4 h-4 text-indigo-400 flex-shrink-0" />
+      <Link2 className="w-4 h-4 text-indigo-600 flex-shrink-0" />
       <div className="flex-1 text-sm">
-        <span className="text-indigo-300 font-medium">WID-Kurs verknüpfen</span>
+        <span className="text-indigo-600 font-medium">WID-Kurs verknüpfen</span>
         <span className="text-slate-400 ml-2">
           Teilnehmer eines WID-Programms? Code eingeben damit dein Koordinator deinen Fortschritt sehen kann.
         </span>
       </div>
       {!open ? (
         <button onClick={() => setOpen(true)}
-          className="text-xs px-3 py-1.5 rounded-lg text-indigo-300 hover:text-white border border-indigo-700/50 hover:border-indigo-500 transition-colors flex-shrink-0">
+          className="text-xs px-3 py-1.5 rounded-lg text-indigo-600 hover:text-white border border-indigo-700/50 hover:border-indigo-500 transition-colors flex-shrink-0">
           Code eingeben
         </button>
       ) : (
@@ -147,7 +147,7 @@ function WidCodeBanner({ onLink }: { onLink: (code: string) => void }) {
             value={code}
             onChange={e => setCode(e.target.value.toUpperCase())}
             placeholder="WID-XXXXXX"
-            className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white text-xs w-32 focus:outline-none focus:border-indigo-500"
+            className="bg-slate-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-gray-900 text-xs w-32 focus:outline-none focus:border-indigo-500"
           />
           <button
             onClick={() => { if (code.length >= 6) { onLink(code); setOpen(false) } }}
@@ -250,7 +250,7 @@ export default function BoardPage() {
       <Nav />
 
       <div className="flex-1 overflow-x-auto p-6">
-        <h1 className="text-2xl font-bold text-white mb-4">Bewerbungs-Board</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">Bewerbungs-Board</h1>
 
         {/* WID-Code Banner wenn nicht verknüpft */}
         {!widCode && (
@@ -260,7 +260,7 @@ export default function BoardPage() {
         {cards.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <p className="text-slate-400 mb-3">Noch keine Jobs gespeichert.</p>
-            <Link href="/jobs" className="text-indigo-400 hover:text-indigo-300 text-sm transition-colors">
+            <Link href="/jobs" className="text-indigo-600 hover:text-indigo-600 text-sm transition-colors">
               Jobs suchen →
             </Link>
           </div>
@@ -274,7 +274,7 @@ export default function BoardPage() {
               <div className={`rounded-2xl border-2 ${colBorder[col.color]} ${colBg[col.color]} p-3 min-h-96`}>
                 <div className="flex items-center justify-between mb-3 px-1">
                   <span className="text-white font-semibold text-sm">{col.label}</span>
-                  <span className="text-xs text-slate-500 bg-slate-800 px-2 py-0.5 rounded-full">
+                  <span className="text-xs text-slate-500 bg-slate-50 px-2 py-0.5 rounded-full">
                     {cardsForCol(col.id).length}
                   </span>
                 </div>
@@ -286,10 +286,10 @@ export default function BoardPage() {
                     return (
                       <div key={card.jobId} draggable
                         onDragStart={() => onDragStart(card.jobId)}
-                        className={`bg-slate-900 border rounded-xl p-3 cursor-grab active:cursor-grabbing transition-all ${
+                        className={`bg-white border rounded-xl p-3 cursor-grab active:cursor-grabbing transition-all ${
                           card.starred
                             ? 'border-yellow-500/50 shadow-[0_0_12px_rgba(234,179,8,0.12)]'
-                            : 'border-slate-700 hover:border-slate-500'
+                            : 'border-gray-200 hover:border-slate-500'
                         } ${dragging === card.jobId ? 'opacity-50' : ''}`}>
 
                         <div className="flex items-start gap-1.5">
@@ -301,7 +301,7 @@ export default function BoardPage() {
                           </div>
                           <button onClick={e => handleStar(e, card.jobId)}
                             className={`p-1 rounded flex-shrink-0 transition-colors ${
-                              card.starred ? 'text-yellow-400' : 'text-slate-700 hover:text-slate-400'
+                              card.starred ? 'text-yellow-700' : 'text-slate-700 hover:text-slate-400'
                             }`}>
                             <Star className="w-3.5 h-3.5" fill={card.starred ? 'currentColor' : 'none'} />
                           </button>
@@ -317,7 +317,7 @@ export default function BoardPage() {
                               hour: '2-digit', minute: '2-digit',
                             })}
                             {card.emailProof && (
-                              <span className="ml-1 text-indigo-400" title={card.emailProof}>
+                              <span className="ml-1 text-indigo-600" title={card.emailProof}>
                                 ✉
                               </span>
                             )}
@@ -328,14 +328,14 @@ export default function BoardPage() {
                           <p className="text-slate-500 text-xs italic mt-2 line-clamp-2">{card.notes}</p>
                         )}
 
-                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-800">
+                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
                           <button onClick={() => { setEditNote(card.jobId); setNoteText(card.notes || '') }}
-                            className="text-slate-500 hover:text-slate-300 transition-colors p-0.5">
+                            className="text-slate-500 hover:text-slate-700 transition-colors p-0.5">
                             <StickyNote className="w-3.5 h-3.5" />
                           </button>
                           <a href={job.url} target="_blank" rel="noopener noreferrer"
                             onClick={e => e.stopPropagation()}
-                            className="text-slate-500 hover:text-slate-300 transition-colors p-0.5">
+                            className="text-slate-500 hover:text-slate-700 transition-colors p-0.5">
                             <ExternalLink className="w-3.5 h-3.5" />
                           </a>
                         </div>
@@ -345,7 +345,7 @@ export default function BoardPage() {
                           {COLUMNS.filter(c => c.id !== col.id).map(c => (
                             <button key={c.id}
                               onClick={() => handleMove(card.jobId, c.id)}
-                              className="text-xs text-slate-500 hover:text-slate-300 px-1.5 py-0.5 rounded hover:bg-slate-800 transition-all">
+                              className="text-xs text-slate-500 hover:text-slate-700 px-1.5 py-0.5 rounded hover:bg-slate-50 transition-all">
                               → {c.label.split(' ')[1]}
                             </button>
                           ))}
@@ -372,11 +372,11 @@ export default function BoardPage() {
       {/* Notiz-Modal */}
       {editNote && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 w-full max-w-sm">
             <h3 className="text-white font-semibold mb-3">Notiz</h3>
             <textarea value={noteText} onChange={e => setNoteText(e.target.value)}
               placeholder="Notizen, nächste Schritte, Ansprechpartner..." rows={4}
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none" />
+              className="w-full bg-slate-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-900 text-sm placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none" />
             <div className="flex gap-2 mt-3">
               <button onClick={() => saveNote(editNote)}
                 className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl py-2 text-sm font-medium transition-colors">
