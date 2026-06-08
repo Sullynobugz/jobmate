@@ -111,7 +111,7 @@ export function setWidCode(code: string) {
   save({ ...s, widCode: code.trim().toUpperCase() })
 }
 
-async function sendWidEvent(type: 'job_saved' | 'application', data: Record<string, unknown>) {
+async function sendWidEvent(type: 'job_saved' | 'application' | 'cv_upload', data: Record<string, unknown>) {
   const widCode = getWidCode()
   if (!widCode) return
   try {
@@ -135,6 +135,10 @@ export async function trackJobSavedToWid(job: Job) {
     company: job.company,
     jobUrl: job.url,
   })
+}
+
+export async function trackCvUpdatedToWid(filename: string, action: 'uploaded' | 'created' | 'improved') {
+  await sendWidEvent('cv_upload', { filename, action })
 }
 
 export async function trackApplicationToWid(job: Job, appliedAt: string, emailProof?: string) {

@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { FileText, Search, LayoutGrid, ChevronRight, PlusCircle, Upload } from 'lucide-react'
+import { FileText, Search, LayoutGrid, ChevronRight, PlusCircle, Upload, ShieldCheck } from 'lucide-react'
 import { setWidCode, loadState } from '@/store/appStore'
 
 export default function Home() {
   const router = useRouter()
+  const [widLinked, setWidLinked] = useState(false)
 
   useEffect(() => {
     // ?wid= param von WID abspeichern
@@ -21,6 +22,7 @@ export default function Home() {
 
     // Wiederkehrender Nutzer mit gespeichertem Lebenslauf → direkt zur CV-Seite
     const state = loadState()
+    setWidLinked(!!state.widCode || !!wid)
     if (state.cv?.raw) {
       router.replace('/cv')
     }
@@ -41,6 +43,14 @@ export default function Home() {
       <p className="text-slate-400 text-base text-center mb-10">
         Dein KI-Assistent für die Jobsuche in Deutschland
       </p>
+
+      {widLinked && (
+        <div className="mb-8 flex items-center gap-2 px-4 py-2 rounded-full border"
+          style={{ background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.25)', color: '#f59e0b' }}>
+          <ShieldCheck className="w-4 h-4" />
+          <span className="text-sm font-semibold">Teil deines WID-Integrationsprogramms</span>
+        </div>
+      )}
 
       {/* Was JobMate macht */}
       <div className="flex flex-col gap-2.5 mb-12 w-full max-w-sm">

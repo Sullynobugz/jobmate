@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Upload, Send, FileText, ArrowRight, Download, Search, Kanban, ChevronRight, PlusCircle, Pencil, Trash2 } from 'lucide-react'
-import { loadState, saveCV, saveChatHistory } from '@/store/appStore'
+import { loadState, saveCV, saveChatHistory, trackCvUpdatedToWid } from '@/store/appStore'
 import type { ChatMessage } from '@/types'
 import Link from 'next/link'
 import { Nav } from '@/components/Nav'
@@ -75,6 +75,7 @@ export default function CVPage() {
       setCvText(text)
       setFilename(file.name)
       saveCV({ raw: text, improved: text, filename: file.name, updatedAt: new Date().toISOString() })
+      void trackCvUpdatedToWid(file.name, 'uploaded')
       const welcome: ChatMessage = {
         role: 'assistant',
         content: `✅ Lebenslauf **${file.name}** hochgeladen und analysiert.\n\nWas möchtest du verbessern? Ich kann dir Feedback geben, Formulierungen überarbeiten oder einen komplett überarbeiteten Entwurf erstellen.`,
@@ -195,6 +196,7 @@ export default function CVPage() {
           setCvText(extracted)
           setFilename('Mein Lebenslauf')
           saveCV({ raw: extracted, improved: extracted, filename: 'Mein Lebenslauf.txt', updatedAt: new Date().toISOString() })
+          void trackCvUpdatedToWid('Mein Lebenslauf.txt', 'created')
           setCvCreated(true)
         }
       }
@@ -206,6 +208,7 @@ export default function CVPage() {
           filename,
           updatedAt: new Date().toISOString(),
         })
+        void trackCvUpdatedToWid(filename, 'improved')
       }
     } finally {
       if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null }
