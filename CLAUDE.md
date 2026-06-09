@@ -74,6 +74,9 @@ JOOBLE_API_KEY=...
 1. **Distanz-Radar**: Leaflet-Karte auf der Jobs-Seite mit km-Kreisen (Koordinaten liegen vor)
 2. **CV-Export**: Verbesserter Lebenslauf als PDF generieren (react-pdf)
 
+## ⚠️ Dark Mode deaktiviert
+`src/app/globals.css` hat keinen `@media (prefers-color-scheme: dark)` Block. Alle drei Apps (WID, Linguu, JobMate) bleiben fix im Light Theme — für visuelle Einheitlichkeit bei Präsentationen und weil Linguu hardcodierte Hex-Werte statt CSS-Variablen nutzt.
+
 ## Entwicklungslog
 | Datum | Was & Warum |
 |-------|-------------|
@@ -83,3 +86,4 @@ JOOBLE_API_KEY=...
 | 2026-06-07 | Interview-Vorbereitung: 3-Step-Flow, /api/interview-prep. Live deployed: jobmate.techstag.de |
 | 2026-06-07 | Recruiter-Pfad entfernt (verwirrt User). Neue Landing: Erklärung + CV-Frage → ?start=create/upload |
 | 2026-06-07 | h-screen Chat-Fix: Layout bleibt im Viewport. Linke Spalte zeigt nur Datei-Info (kein Volltext). Chat-Nachrichten mit Slide-In-Animation (CSS: chat-in-user / chat-in-bot) |
+| 2026-06-08/09 | Full Light Theme Migration: alle 4 Seiten (cv, board, jobs, interview) von dark-mode Tailwind-Klassen auf light bereinigt. Dark Mode Override aus globals.css entfernt. Nav Indigo-Farbe. Landing neu geschrieben mit CSS-Variablen. |
