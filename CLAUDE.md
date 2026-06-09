@@ -87,3 +87,4 @@ JOOBLE_API_KEY=...
 | 2026-06-07 | Recruiter-Pfad entfernt (verwirrt User). Neue Landing: Erklärung + CV-Frage → ?start=create/upload |
 | 2026-06-07 | h-screen Chat-Fix: Layout bleibt im Viewport. Linke Spalte zeigt nur Datei-Info (kein Volltext). Chat-Nachrichten mit Slide-In-Animation (CSS: chat-in-user / chat-in-bot) |
 | 2026-06-08/09 | Full Light Theme Migration: alle 4 Seiten (cv, board, jobs, interview) von dark-mode Tailwind-Klassen auf light bereinigt. Dark Mode Override aus globals.css entfernt. Nav Indigo-Farbe. Landing neu geschrieben mit CSS-Variablen. |
+| 2026-06-09 | Board: draggable von ganzer Card auf Grip-Handle verschoben → Buttons wieder zuverlässig klickbar. Move-Buttons größere Hit-Areas, cursor-pointer überall. Jobs: Action-Buttons (Öffnen/Merken/Üben) mit cursor-pointer + py-2 statt py-1.5. |
