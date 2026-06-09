@@ -22,12 +22,12 @@ const COLUMNS: { id: KanbanColumn; label: string; color: string }[] = [
 ]
 
 const colBorder: Record<string, string> = {
-  slate: 'border-gray-200', blue: 'border-blue-700/50',
-  indigo: 'border-indigo-700/50', emerald: 'border-emerald-700/50', red: 'border-red-700/50',
+  slate: 'border-gray-200', blue: 'border-blue-200',
+  indigo: 'border-indigo-200', emerald: 'border-emerald-200', red: 'border-red-200',
 }
 const colBg: Record<string, string> = {
-  slate: 'bg-slate-50', blue: 'bg-blue-900/20',
-  indigo: 'bg-indigo-900/20', emerald: 'bg-emerald-900/20', red: 'bg-red-900/20',
+  slate: 'bg-slate-50', blue: 'bg-blue-50',
+  indigo: 'bg-indigo-50', emerald: 'bg-emerald-50', red: 'bg-red-50',
 }
 
 // ── Bewerbungs-Modal ──────────────────────────────────────────────────────────
@@ -47,10 +47,10 @@ function ApplicationModal({ job, onConfirm, onCancel }: ApplicationModalProps) {
       <div className="bg-white border border-gray-200 rounded-2xl p-6 w-full max-w-md shadow-2xl">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="text-white font-bold text-lg">Bewerbung bestätigen</h3>
+            <h3 className="text-gray-900 font-bold text-lg">Bewerbung bestätigen</h3>
             <p className="text-slate-400 text-sm mt-0.5">{job.title} · {job.company}</p>
           </div>
-          <button onClick={onCancel} className="text-slate-500 hover:text-white p-1">
+          <button onClick={onCancel} className="text-slate-500 hover:text-gray-900 p-1">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -79,7 +79,7 @@ function ApplicationModal({ job, onConfirm, onCancel }: ApplicationModalProps) {
 
           {showTutorial && (
             <div className="mb-2 px-3 py-2.5 rounded-lg text-xs text-slate-700"
-              style={{ background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(99,102,241,0.3)' }}>
+              style={{ background: "var(--primary-subtle)", border: '1px solid rgba(99,102,241,0.3)' }}>
               <p className="font-semibold text-indigo-600 mb-1">Warum ist das wichtig?</p>
               <p className="mb-1">
                 Dein Koordinator kann auf Anfrage nachfragen ob du dich wirklich beworben hast.
@@ -110,7 +110,7 @@ function ApplicationModal({ job, onConfirm, onCancel }: ApplicationModalProps) {
           </button>
           <button
             onClick={onCancel}
-            className="px-4 text-slate-400 hover:text-white text-sm transition-colors"
+            className="px-4 text-slate-500 hover:text-gray-900 text-sm transition-colors"
           >
             Abbrechen
           </button>
@@ -138,7 +138,7 @@ function WidCodeBanner({ onLink }: { onLink: (code: string) => void }) {
       </div>
       {!open ? (
         <button onClick={() => setOpen(true)}
-          className="text-xs px-3 py-1.5 rounded-lg text-indigo-600 hover:text-white border border-indigo-700/50 hover:border-indigo-500 transition-colors flex-shrink-0">
+          className="text-xs px-3 py-1.5 rounded-lg text-indigo-600 hover:text-indigo-700 border border-indigo-200 hover:border-indigo-500 transition-colors flex-shrink-0">
           Code eingeben
         </button>
       ) : (
@@ -154,7 +154,7 @@ function WidCodeBanner({ onLink }: { onLink: (code: string) => void }) {
             className="text-xs px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors">
             Verknüpfen
           </button>
-          <button onClick={() => setOpen(false)} className="text-slate-500 hover:text-white">
+          <button onClick={() => setOpen(false)} className="text-slate-500 hover:text-gray-900">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -259,7 +259,7 @@ export default function BoardPage() {
 
         {cards.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <p className="text-slate-400 mb-3">Noch keine Jobs gespeichert.</p>
+            <p className="text-slate-500 mb-3">Noch keine Jobs gespeichert.</p>
             <Link href="/jobs" className="text-indigo-600 hover:text-indigo-600 text-sm transition-colors">
               Jobs suchen →
             </Link>
@@ -273,7 +273,7 @@ export default function BoardPage() {
               onDrop={e => onDrop(e, col.id)}>
               <div className={`rounded-2xl border-2 ${colBorder[col.color]} ${colBg[col.color]} p-3 min-h-96`}>
                 <div className="flex items-center justify-between mb-3 px-1">
-                  <span className="text-white font-semibold text-sm">{col.label}</span>
+                  <span className="text-gray-900 font-semibold text-sm">{col.label}</span>
                   <span className="text-xs text-slate-500 bg-slate-50 px-2 py-0.5 rounded-full">
                     {cardsForCol(col.id).length}
                   </span>
@@ -294,10 +294,10 @@ export default function BoardPage() {
 
                         <div className="flex items-start gap-1.5">
                           <div className="flex-1 min-w-0">
-                            <p className="text-white text-sm font-semibold leading-snug mb-0.5 line-clamp-2">
+                            <p className="text-gray-900 text-sm font-semibold leading-snug mb-0.5 line-clamp-2">
                               {job.title}
                             </p>
-                            <p className="text-slate-400 text-xs">{job.company} · {job.location}</p>
+                            <p className="text-slate-500 text-xs">{job.company} · {job.location}</p>
                           </div>
                           <button onClick={e => handleStar(e, card.jobId)}
                             className={`p-1 rounded flex-shrink-0 transition-colors ${
@@ -373,7 +373,7 @@ export default function BoardPage() {
       {editNote && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
           <div className="bg-white border border-gray-200 rounded-2xl p-6 w-full max-w-sm">
-            <h3 className="text-white font-semibold mb-3">Notiz</h3>
+            <h3 className="text-gray-900 font-semibold mb-3">Notiz</h3>
             <textarea value={noteText} onChange={e => setNoteText(e.target.value)}
               placeholder="Notizen, nächste Schritte, Ansprechpartner..." rows={4}
               className="w-full bg-slate-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-900 text-sm placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none" />
@@ -382,7 +382,7 @@ export default function BoardPage() {
                 className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl py-2 text-sm font-medium transition-colors">
                 Speichern
               </button>
-              <button onClick={() => setEditNote(null)} className="px-4 text-slate-400 hover:text-white text-sm transition-colors">
+              <button onClick={() => setEditNote(null)} className="px-4 text-slate-500 hover:text-gray-900 text-sm transition-colors">
                 Abbrechen
               </button>
             </div>

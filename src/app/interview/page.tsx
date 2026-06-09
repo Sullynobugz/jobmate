@@ -85,7 +85,7 @@ function JobSelector({ jobs, selected, onSelect }: {
                 }`}
               >
                 <p className="text-sm font-medium text-gray-900 leading-snug">{job.title}</p>
-                {job.company && <p className="text-xs text-slate-400 mt-0.5">{job.company}</p>}
+                {job.company && <p className="text-xs text-slate-500 mt-0.5">{job.company}</p>}
               </button>
             ))}
           </div>
@@ -129,7 +129,7 @@ function PrepGuide({ text }: { text: string }) {
         const body = rest.join('\n').trim()
         const lines = body.split('\n').filter(Boolean)
         return (
-          <div key={i} className="rounded-2xl border border-gray-100 bg-slate-900/60 p-5">
+          <div key={i} className="rounded-2xl border border-gray-200 bg-white p-5">
             <h3 className="text-sm font-semibold text-gray-900 mb-3">{headline.trim()}</h3>
             <div className="space-y-2">
               {lines.map((line, j) => {
@@ -334,7 +334,7 @@ export default function InterviewPage() {
               </div>
             )}
 
-            <div className="rounded-2xl border border-gray-100 bg-slate-900/60 p-5 space-y-4">
+            <div className="rounded-2xl border border-gray-200 bg-white p-5 space-y-4">
               <JobSelector jobs={savedJobs} selected={selectedJob} onSelect={setSelectedJob} />
             </div>
 
@@ -357,7 +357,7 @@ export default function InterviewPage() {
               <button
                 onClick={startInterview}
                 disabled={!selectedJob}
-                className="w-full py-3 rounded-2xl text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed border border-gray-200 text-slate-400 hover:text-white hover:border-slate-500 flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-2xl text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed border border-gray-200 text-slate-400 hover:text-gray-900 hover:border-gray-400 flex items-center justify-center gap-2"
               >
                 <PlayCircle className="w-4 h-4" />
                 Direkt zum Gespräch
@@ -375,7 +375,7 @@ export default function InterviewPage() {
       <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
         <Nav />
         <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-100 bg-white/80">
-          <button onClick={() => setStep('setup')} className="p-1.5 text-slate-500 hover:text-white transition-colors rounded-lg hover:bg-slate-50">
+          <button onClick={() => setStep('setup')} className="p-1.5 text-slate-500 hover:text-gray-900 transition-colors rounded-lg hover:bg-slate-50">
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div className="flex-1">
@@ -422,7 +422,7 @@ export default function InterviewPage() {
 
       {/* Interview Header */}
       <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-100 bg-white/80">
-        <button onClick={reset} className="p-1.5 text-slate-500 hover:text-white transition-colors rounded-lg hover:bg-slate-50">
+        <button onClick={reset} className="p-1.5 text-slate-500 hover:text-gray-900 transition-colors rounded-lg hover:bg-slate-50">
           <ArrowLeft className="w-4 h-4" />
         </button>
         <div className="flex-1 min-w-0">
@@ -434,7 +434,7 @@ export default function InterviewPage() {
             {questionCount} {questionCount === 1 ? 'Frage' : 'Fragen'} beantwortet
           </span>
         )}
-        <button onClick={reset} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-white transition-colors px-2 py-1.5 rounded-lg hover:bg-slate-50">
+        <button onClick={reset} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-gray-900 transition-colors px-2 py-1.5 rounded-lg hover:bg-slate-50">
           <RefreshCw className="w-3.5 h-3.5" /> Neu
         </button>
       </div>
@@ -455,7 +455,7 @@ export default function InterviewPage() {
               <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                 msg.role === 'user'
                   ? 'bg-indigo-600 text-white rounded-br-sm'
-                  : 'bg-slate-50 text-slate-100 rounded-bl-sm'
+                  : 'bg-slate-100 text-gray-900 rounded-bl-sm'
               }`}>
                 {msg.content || (loading && i === messages.length - 1
                   ? <span className="flex gap-1">{[0,1,2].map(d => <span key={d} className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: `${d * 150}ms` }} />)}</span>
@@ -470,7 +470,7 @@ export default function InterviewPage() {
       </div>
 
       {/* Input */}
-      <div className="border-t border-gray-100 bg-slate-900/80 px-4 py-3">
+      <div className="border-t border-gray-100 bg-white border-t border-gray-100 px-4 py-3">
         <div className="flex gap-2 items-end max-w-3xl mx-auto">
           {speechSupported && (
             <button
@@ -478,7 +478,7 @@ export default function InterviewPage() {
               className={`flex-shrink-0 p-2.5 rounded-xl border transition-all ${
                 recording
                   ? 'bg-red-600 border-red-500 text-gray-900 animate-pulse'
-                  : 'bg-slate-50 border-gray-200 text-slate-400 hover:border-slate-500 hover:text-white'
+                  : 'bg-slate-50 border-gray-200 text-slate-400 hover:border-gray-400 hover:text-gray-900'
               }`}
               title={recording ? 'Aufnahme stoppen' : 'Spracheingabe'}
             >

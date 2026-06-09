@@ -245,21 +245,21 @@ export default function CVPage() {
           <div className="w-full max-w-md">
             <div className="text-center mb-10">
               <div className="text-5xl mb-4">📄</div>
-              <h1 className="text-2xl font-bold text-white mb-2">Lebenslauf</h1>
-              <p className="text-slate-400">Hast du bereits einen Lebenslauf oder möchtest du einen erstellen?</p>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Lebenslauf</h1>
+              <p className="text-slate-500">Hast du bereits einen Lebenslauf oder möchtest du einen erstellen?</p>
             </div>
 
             <div className="flex flex-col gap-4">
               <button
                 onClick={() => fileRef.current?.click()}
-                className="w-full flex items-center gap-4 p-5 rounded-2xl border border-slate-700 hover:border-indigo-500 bg-slate-900/50 hover:bg-slate-800/50 transition-all group text-left"
+                className="w-full flex items-center gap-4 p-5 rounded-2xl border border-gray-200 hover:border-indigo-500 bg-white hover:bg-slate-50 transition-all group text-left"
               >
                 <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-500/20 transition-colors">
                   <Upload className="w-6 h-6 text-indigo-400" />
                 </div>
                 <div>
-                  <p className="text-white font-semibold">Lebenslauf hochladen</p>
-                  <p className="text-slate-400 text-sm mt-0.5">PDF, DOCX, TXT — dann direkt verbessern</p>
+                  <p className="text-gray-900 font-semibold">Lebenslauf hochladen</p>
+                  <p className="text-slate-500 text-sm mt-0.5">PDF, DOCX, TXT — dann direkt verbessern</p>
                 </div>
                 <ArrowRight className="w-5 h-5 text-slate-600 ml-auto group-hover:text-indigo-400 transition-colors" />
               </button>
@@ -268,14 +268,14 @@ export default function CVPage() {
 
               <button
                 onClick={startCreateMode}
-                className="w-full flex items-center gap-4 p-5 rounded-2xl border border-slate-700 hover:border-emerald-500 bg-slate-900/50 hover:bg-slate-800/50 transition-all group text-left"
+                className="w-full flex items-center gap-4 p-5 rounded-2xl border border-gray-200 hover:border-emerald-500 bg-white hover:bg-slate-50 transition-all group text-left"
               >
                 <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-500/20 transition-colors">
                   <PlusCircle className="w-6 h-6 text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-white font-semibold">Lebenslauf erstellen</p>
-                  <p className="text-slate-400 text-sm mt-0.5">Noch keinen? KI führt dich Schritt für Schritt</p>
+                  <p className="text-gray-900 font-semibold">Lebenslauf erstellen</p>
+                  <p className="text-slate-500 text-sm mt-0.5">Noch keinen? KI führt dich Schritt für Schritt</p>
                 </div>
                 <ArrowRight className="w-5 h-5 text-slate-600 ml-auto group-hover:text-emerald-400 transition-colors" />
               </button>
@@ -298,8 +298,8 @@ export default function CVPage() {
       <div className="flex flex-1 min-h-0 overflow-hidden">
 
         {/* Left: CV Preview */}
-        <div className="w-2/5 border-r border-slate-800 flex flex-col min-h-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between gap-3">
+        <div className="w-2/5 border-r border-gray-200 flex flex-col min-h-0">
+          <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 min-w-0">
               <FileText className="w-4 h-4 text-slate-400 flex-shrink-0" />
               <span className="text-slate-400 text-sm font-medium">Lebenslauf</span>
@@ -307,7 +307,7 @@ export default function CVPage() {
             {(cvText || messages.length > 0) && (
               <button
                 onClick={resetCV}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-red-300 border border-slate-800 hover:border-red-500/40 transition-colors"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-500 hover:text-red-600 border border-gray-200 hover:border-red-400 transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Zurücksetzen
@@ -323,14 +323,14 @@ export default function CVPage() {
               isCreateMode ? (
                 <div className="text-center">
                   <div className="text-4xl mb-4 animate-pulse">✍️</div>
-                  <p className="text-slate-300 font-semibold mb-2">Lebenslauf wird erstellt</p>
+                  <p className="text-slate-700 font-semibold mb-2">Lebenslauf wird erstellt</p>
                   <p className="text-slate-500 text-sm max-w-xs">
                     Beantworte die Fragen im Chat — dein Lebenslauf erscheint hier sobald er fertig ist.
                   </p>
                 </div>
               ) : (
                 <div
-                  className="w-full border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-2xl p-8 text-center cursor-pointer transition-all group"
+                  className="w-full border-2 border-dashed border-gray-300 hover:border-indigo-500 rounded-2xl p-8 text-center cursor-pointer transition-all group"
                   onClick={() => fileRef.current?.click()}
                   onDragOver={e => e.preventDefault()}
                   onDrop={e => {
@@ -353,17 +353,17 @@ export default function CVPage() {
                     ✅ Lebenslauf erstellt!
                   </div>
                 )}
-                <div className="flex flex-col items-center gap-3 p-5 rounded-2xl bg-slate-900/60 border border-slate-700">
+                <div className="flex flex-col items-center gap-3 p-5 rounded-2xl bg-slate-50 border border-gray-200">
                   <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
                     <FileText className="w-7 h-7 text-indigo-400" />
                   </div>
                   <div className="text-center">
-                    <p className="text-slate-200 font-semibold text-sm truncate max-w-full">{filename || 'Lebenslauf'}</p>
+                    <p className="text-gray-900 font-semibold text-sm truncate max-w-full">{filename || 'Lebenslauf'}</p>
                     <p className="text-slate-500 text-xs mt-0.5">{cvText.length} Zeichen · bereit zur Verbesserung</p>
                   </div>
                   <button
                     onClick={downloadCV}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white border border-slate-700 hover:border-slate-500 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-gray-900 border border-gray-200 hover:border-gray-400 transition-colors"
                   >
                     <Download className="w-3.5 h-3.5" />
                     Herunterladen
@@ -371,7 +371,7 @@ export default function CVPage() {
                 </div>
                 <button
                   onClick={() => fileRef.current?.click()}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-300 border border-slate-800 hover:border-slate-600 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-700 border border-gray-200 hover:border-gray-400 transition-colors"
                 >
                   <Pencil className="w-3 h-3" />
                   Andere Datei hochladen
@@ -387,7 +387,7 @@ export default function CVPage() {
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <div className="text-4xl mb-4">🤖</div>
-                <p className="text-slate-300 font-semibold mb-2">Dein KI-Karriere-Coach</p>
+                <p className="text-slate-700 font-semibold mb-2">Dein KI-Karriere-Coach</p>
                 <p className="text-slate-500 text-sm max-w-xs">
                   {isCreateMode
                     ? 'Ich führe dich Schritt für Schritt durch die Erstellung deines Lebenslaufs.'
@@ -404,7 +404,7 @@ export default function CVPage() {
                   className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                     msg.role === 'user'
                       ? 'bg-indigo-600 text-white rounded-br-sm'
-                      : 'bg-slate-800 text-slate-200 rounded-bl-sm'
+                      : 'bg-slate-100 text-gray-900 rounded-bl-sm'
                   }`}
                 >
                   <div
@@ -421,11 +421,11 @@ export default function CVPage() {
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-slate-800 rounded-2xl rounded-bl-sm px-4 py-3">
+                <div className="bg-slate-100 rounded-2xl rounded-bl-sm px-4 py-3">
                   <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    <span className="w-2 h-2 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-2 h-2 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-2 h-2 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
                 </div>
               </div>
@@ -434,7 +434,7 @@ export default function CVPage() {
           </div>
 
           {/* Input */}
-          <div className="px-6 py-4 border-t border-slate-800">
+          <div className="px-6 py-4 border-t border-gray-200">
             {cvCreated && isCreateMode && (
               <div className="flex gap-2 mb-3">
                 <button
@@ -465,7 +465,7 @@ export default function CVPage() {
                     : 'Frag mich etwas zu deinem Lebenslauf...'
                 }
                 disabled={chatDisabled || loading}
-                className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-50"
+                className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-50"
               />
               <button
                 onClick={send}

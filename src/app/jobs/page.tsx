@@ -17,7 +17,7 @@ const SOURCE_META: Record<JobSource, { label: string; color: string; bg: string 
   remoteok:  { label: 'RemoteOK',     color: 'text-teal-600',    bg: 'bg-teal-500/15 border-teal-500/30' },
   adzuna:    { label: 'Adzuna',       color: 'text-violet-600',  bg: 'bg-violet-500/15 border-violet-500/30' },
   jooble:    { label: 'Jooble',       color: 'text-yellow-700',  bg: 'bg-yellow-500/15 border-yellow-500/30' },
-  manual:    { label: 'Manuell',      color: 'text-slate-400',   bg: 'bg-slate-500/15 border-slate-500/30' },
+  manual:    { label: 'Manuell',      color: "text-slate-600",   bg: "bg-slate-100 border-slate-300" },
 }
 
 const JOB_TYPES = [
@@ -150,7 +150,7 @@ export default function JobsPage() {
           {/* Toggle */}
           <button
             onClick={() => setFiltersOpen(v => !v)}
-            className="flex items-center justify-center gap-2 px-4 py-3 border-b border-gray-100 text-slate-400 hover:text-white transition-colors w-full"
+            className="flex items-center justify-center gap-2 px-4 py-3 border-b border-gray-100 text-slate-500 hover:text-gray-900 transition-colors w-full"
             title={filtersOpen ? 'Filter einklappen' : 'Filter ausklappen'}
           >
             <SlidersHorizontal className="w-4 h-4 flex-shrink-0" />
@@ -214,7 +214,7 @@ export default function JobsPage() {
                       className={`flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg border transition-all text-left ${
                         prefs.remote === opt.id
                           ? 'bg-indigo-600/20 border-indigo-500 text-indigo-600'
-                          : 'bg-slate-50/50 border-gray-200 text-slate-400 hover:border-slate-500 hover:text-slate-700'
+                          : 'bg-slate-50/50 border-gray-200 text-slate-400 hover:border-gray-400 hover:text-slate-700'
                       }`}
                     >
                       {opt.icon}
@@ -263,7 +263,7 @@ export default function JobsPage() {
                           }`}
                         >
                           <span>{meta.label}</span>
-                          <span className="bg-slate-700/60 px-1.5 py-0.5 rounded-md text-slate-700">{count}</span>
+                          <span className="bg-slate-200 px-1.5 py-0.5 rounded-md text-slate-600">{count}</span>
                         </button>
                       )
                     })}
@@ -339,7 +339,7 @@ export default function JobsPage() {
                 <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-5">
                   <Search className="w-6 h-6 text-indigo-600" />
                 </div>
-                <p className="text-white font-semibold text-lg mb-1">Jobs finden</p>
+                <p className="text-gray-900 font-semibold text-lg mb-1">Jobs finden</p>
                 <p className="text-slate-500 text-sm mb-6 leading-relaxed">
                   Suche nach Jobtitel oder Bereich — oder lass das Feld leer und such nur nach Ort.
                 </p>
@@ -352,7 +352,7 @@ export default function JobsPage() {
                       <button
                         key={q}
                         onClick={() => { setQuery(q); search(q) }}
-                        className="text-sm text-slate-400 hover:text-white border border-gray-200 hover:border-indigo-500 hover:bg-indigo-500/10 px-3 py-1.5 rounded-xl transition-all"
+                        className="text-sm text-slate-600 hover:text-indigo-600 border border-gray-200 hover:border-indigo-500 hover:bg-indigo-500/10 px-3 py-1.5 rounded-xl transition-all"
                       >
                         {q}
                       </button>
@@ -362,7 +362,7 @@ export default function JobsPage() {
 
                 {!hasCV && (
                   <div className="mt-8 w-full p-4 rounded-2xl border border-gray-100 bg-white/80">
-                    <p className="text-slate-400 text-sm mb-3">Hast du deinen Lebenslauf dabei?</p>
+                    <p className="text-slate-500 text-sm mb-3">Hast du deinen Lebenslauf dabei?</p>
                     <Link
                       href="/cv"
                       className="inline-flex items-center gap-2 text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl transition-colors"
@@ -424,10 +424,10 @@ export default function JobsPage() {
                         </div>
 
                         {/* Titel */}
-                        <h3 className="text-white font-semibold text-sm leading-snug mb-0.5 group-hover:text-indigo-600 transition-colors">
+                        <h3 className="text-gray-900 font-semibold text-sm leading-snug mb-0.5 group-hover:text-indigo-600 transition-colors">
                           {job.title}
                         </h3>
-                        <p className="text-slate-400 text-xs mb-0.5">{job.company}</p>
+                        <p className="text-slate-500 text-xs mb-0.5">{job.company}</p>
                         <p className="text-slate-600 text-xs flex items-center gap-1 mb-2">
                           <MapPin className="w-3 h-3 flex-shrink-0" /> {job.location}
                         </p>
@@ -465,7 +465,7 @@ export default function JobsPage() {
                           href={job.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white border border-gray-200 hover:border-slate-500 px-3 py-1.5 rounded-lg transition-colors"
+                          className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-gray-900 border border-gray-200 hover:border-gray-400 px-3 py-1.5 rounded-lg transition-colors"
                         >
                           <ExternalLink className="w-3 h-3" /> Öffnen
                         </a>
