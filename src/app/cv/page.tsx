@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Upload, Send, FileText, ArrowRight, Download, Search, Kanban, ChevronRight, PlusCircle, Pencil, Trash2 } from 'lucide-react'
 import { clearCvSession, loadState, saveCV, saveChatHistory, trackCvUpdatedToWid } from '@/store/appStore'
+import { downloadCvAsPdf } from '@/lib/cvPdf'
 import type { ChatMessage } from '@/types'
 import Link from 'next/link'
 import { Nav } from '@/components/Nav'
@@ -28,6 +29,7 @@ export default function CVPage() {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [cvCreated, setCvCreated] = useState(false)
+  const [exportingPdf, setExportingPdf] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const rawBufferRef = useRef('')
@@ -226,6 +228,22 @@ export default function CVPage() {
     URL.revokeObjectURL(url)
   }
 
+  async function exportPDF() {
+    if (!cvText || exportingPdf) return
+    setExportingPdf(true)
+    try {
+      await downloadCvAsPdf(cvText, filename)
+    } catch {
+      const errMsg: ChatMessage = {
+        role: 'assistant',
+        content: '❌ PDF-Export fehlgeschlagen. Du kannst deinen Lebenslauf alternativ als TXT herunterladen.',
+      }
+      setMessages(prev => [...prev, errMsg])
+    } finally {
+      setExportingPdf(false)
+    }
+  }
+
   function resetCV() {
     setCvText('')
     setFilename('')
@@ -361,13 +379,23 @@ export default function CVPage() {
                     <p className="text-gray-900 font-semibold text-sm truncate max-w-full">{filename || 'Lebenslauf'}</p>
                     <p className="text-slate-500 text-xs mt-0.5">{cvText.length} Zeichen · bereit zur Verbesserung</p>
                   </div>
-                  <button
-                    onClick={downloadCV}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-gray-900 border border-gray-200 hover:border-gray-400 transition-colors"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    Herunterladen
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={downloadCV}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-gray-900 border border-gray-200 hover:border-gray-400 transition-colors"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      TXT
+                    </button>
+                    <button
+                      onClick={exportPDF}
+                      disabled={exportingPdf}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium text-indigo-600 hover:text-indigo-700 border border-indigo-300 hover:border-indigo-400 bg-indigo-500/8 transition-colors disabled:opacity-50"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      {exportingPdf ? 'Erstelle…' : 'PDF'}
+                    </button>
+                  </div>
                 </div>
                 <button
                   onClick={() => fileRef.current?.click()}

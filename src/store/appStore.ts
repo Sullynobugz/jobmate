@@ -116,6 +116,25 @@ export function setWidCode(code: string) {
   save({ ...s, widCode: code.trim().toUpperCase() })
 }
 
+/**
+ * Liest ?wid= aus der aktuellen URL, persistiert den Code und entfernt
+ * den Param wieder aus der Adresszeile. Wird beim App-Start aufgerufen,
+ * damit der WID-Code unabhängig von der Landing-Page erfasst wird
+ * (z.B. wenn ein Teilnehmer direkt auf /jobs?wid=… verlinkt wird).
+ * Gibt den erfassten Code zurück (oder undefined).
+ */
+export function captureWidFromUrl(): string | undefined {
+  if (typeof window === 'undefined') return undefined
+  const params = new URLSearchParams(window.location.search)
+  const wid = params.get('wid')
+  if (!wid) return undefined
+  setWidCode(wid)
+  const url = new URL(window.location.href)
+  url.searchParams.delete('wid')
+  window.history.replaceState({}, '', url.toString())
+  return wid
+}
+
 async function sendWidEvent(type: 'job_saved' | 'application' | 'cv_upload', data: Record<string, unknown>) {
   const widCode = getWidCode()
   if (!widCode) return

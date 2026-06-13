@@ -3,21 +3,14 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { FileText, Search, LayoutGrid, ChevronRight, PlusCircle, Upload, ShieldCheck } from 'lucide-react'
-import { setWidCode, loadState } from '@/store/appStore'
+import { captureWidFromUrl, loadState } from '@/store/appStore'
 
 export default function Home() {
   const router = useRouter()
   const [widLinked, setWidLinked] = useState(false)
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const wid = params.get('wid')
-    if (wid) {
-      setWidCode(wid)
-      const url = new URL(window.location.href)
-      url.searchParams.delete('wid')
-      window.history.replaceState({}, '', url.toString())
-    }
+    const wid = captureWidFromUrl()
 
     const state = loadState()
     setWidLinked(!!state.widCode || !!wid)

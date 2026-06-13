@@ -8,7 +8,18 @@ import {
 import { addJob, addToKanban, loadState, savePreferences, trackJobSavedToWid } from '@/store/appStore'
 import type { Job, SearchPreferences, RemotePreference, JobSource } from '@/types'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { Nav } from '@/components/Nav'
+
+// Leaflet greift auf window zu → nur clientseitig laden (kein SSR-Prerender)
+const JobRadarMap = dynamic(() => import('@/components/JobRadarMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center text-xs text-slate-400" style={{ height: 360 }}>
+      Karte wird geladen…
+    </div>
+  ),
+})
 
 const SOURCE_META: Record<JobSource, { label: string; color: string; bg: string }> = {
   ba:        { label: 'Bundesagentur', color: 'text-blue-600',    bg: 'bg-blue-500/15 border-blue-500/30' },
@@ -52,6 +63,8 @@ export default function JobsPage() {
   const [activeSources, setActiveSources] = useState<Set<JobSource>>(new Set())
   const [hasCV, setHasCV] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(true)
+  const [centerCoords, setCenterCoords] = useState<{ lat: number; lng: number } | null>(null)
+  const [radarOpen, setRadarOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [prefs, setPrefs] = useState<SearchPreferences>({
@@ -105,6 +118,7 @@ export default function JobsPage() {
       const data = await res.json()
       setJobs(data.jobs ?? [])
       setTotal(data.total ?? 0)
+      setCenterCoords(data.centerCoords ?? null)
     } finally {
       setLoading(false)
     }
@@ -310,13 +324,50 @@ export default function JobsPage() {
 
             {/* Status-Zeile */}
             {hasSearched && !loading && (
-              <p className="text-slate-500 text-xs mt-2">
-                <span className="text-slate-700 font-medium">{total}</span> Jobs gefunden
-                {activeSources.size > 0 && <> · <span className="text-indigo-600">{displayedJobs.length} gefiltert</span></>}
-                {prefs.location && prefs.remote !== 'remote' && ` · ${prefs.radius} km um ${prefs.location}`}
-              </p>
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-slate-500 text-xs">
+                  <span className="text-slate-700 font-medium">{total}</span> Jobs gefunden
+                  {activeSources.size > 0 && <> · <span className="text-indigo-600">{displayedJobs.length} gefiltert</span></>}
+                  {prefs.location && prefs.remote !== 'remote' && ` · ${prefs.radius} km um ${prefs.location}`}
+                </p>
+                {centerCoords && (
+                  <button
+                    onClick={() => setRadarOpen(v => !v)}
+                    className={`flex items-center gap-1.5 text-xs px-3 py-1 rounded-lg border transition-all ${
+                      radarOpen
+                        ? 'bg-indigo-600/15 border-indigo-500 text-indigo-600'
+                        : 'bg-slate-50 border-gray-200 text-slate-500 hover:border-slate-400'
+                    }`}
+                  >
+                    <MapPin className="w-3 h-3" /> Distanz-Radar
+                  </button>
+                )}
+              </div>
             )}
           </div>
+
+          {/* Distanz-Radar — Leaflet-Karte: Nutzer-Standort als Mittelpunkt, Jobs als Pins, 15/30/50 km-Ringe */}
+          {radarOpen && centerCoords && (() => {
+            const jobsWithCoords = displayedJobs.filter(j => j.lat != null && j.lng != null)
+            return (
+              <div className="border-b border-gray-100 px-5 py-4 flex flex-col gap-2">
+                <p className="text-xs text-slate-500">
+                  Ringe 15 / 30 / 50 km · {jobsWithCoords.length} Jobs mit Koordinaten
+                </p>
+                <JobRadarMap
+                  center={centerCoords}
+                  jobs={displayedJobs}
+                  savedIds={added}
+                  radius={prefs.radius}
+                />
+                <div className="flex gap-4 text-xs text-slate-500">
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500 inline-block" /> Dein Standort</span>
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-indigo-600 inline-block" /> Job</span>
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" /> Gemerkt</span>
+                </div>
+              </div>
+            )
+          })()}
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto px-5 py-4">
@@ -391,7 +442,7 @@ export default function JobsPage() {
                 return (
                   <div
                     key={job.id}
-                    className="bg-white border border-gray-100 rounded-2xl p-4 hover:border-slate-600 transition-all group"
+                    className="bg-white border border-gray-100 rounded-2xl p-4 hover:border-slate-500 hover:shadow-sm transition-all group"
                   >
                     <div className="flex items-start gap-3">
                       <div className="flex-1 min-w-0">
@@ -465,14 +516,14 @@ export default function JobsPage() {
                           href={job.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-gray-900 border border-gray-200 hover:border-gray-400 px-3 py-1.5 rounded-lg transition-colors"
+                          className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-gray-900 border border-gray-200 hover:border-gray-400 px-3 py-2 rounded-lg transition-colors cursor-pointer"
                         >
                           <ExternalLink className="w-3 h-3" /> Öffnen
                         </a>
                         <button
                           onClick={() => saveJob(job)}
                           disabled={isSaved}
-                          className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-colors ${
+                          className={`flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg transition-colors cursor-pointer disabled:cursor-default ${
                             isSaved
                               ? 'bg-emerald-500/20 text-emerald-600 border border-emerald-500/30'
                               : 'bg-indigo-600 hover:bg-indigo-500 text-white'
@@ -483,7 +534,7 @@ export default function JobsPage() {
                         {isSaved && (
                           <Link
                             href="/interview"
-                            className="flex items-center gap-1.5 text-xs text-indigo-600 bg-indigo-600/15 hover:bg-indigo-600/25 border border-indigo-500/25 px-3 py-1.5 rounded-lg transition-colors"
+                            className="flex items-center gap-1.5 text-xs text-indigo-600 bg-indigo-600/15 hover:bg-indigo-600/25 border border-indigo-500/25 px-3 py-2 rounded-lg transition-colors cursor-pointer"
                           >
                             <MessageSquare className="w-3 h-3" /> Üben
                           </Link>

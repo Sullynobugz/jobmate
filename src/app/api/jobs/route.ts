@@ -316,5 +316,5 @@ export async function GET(req: NextRequest) {
   })
 
   const sources = [...new Set(jobs.map(j => j.source))]
-  return NextResponse.json({ jobs, total: jobs.length, sources })
+  return NextResponse.json({ jobs, total: jobs.length, sources, centerCoords: userCoords })
 }
