@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import type { Job, JobSource } from '@/types'
+import type { Job } from '@/types'
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371
@@ -45,6 +45,94 @@ function locationMatches(jobLocation: string, userLocation: string): boolean {
   const ul = userLocation.toLowerCase()
   // Übereinstimmung wenn jobLocation den Nutzerort oder umgekehrt enthält
   return jl.includes(ul) || ul.includes(jl)
+}
+
+const STOP_WORDS = new Set([
+  'der', 'die', 'das', 'den', 'dem', 'des', 'ein', 'eine', 'einen', 'einem', 'einer',
+  'und', 'oder', 'mit', 'für', 'von', 'im', 'in', 'am', 'an', 'auf', 'als', 'zu',
+  'job', 'jobs', 'stelle', 'stellen', 'arbeit',
+])
+
+const QUERY_SYNONYMS: Record<string, string[]> = {
+  'kunstliche intelligenz': [
+    'ki',
+    'ai',
+    'artificial intelligence',
+    'machine learning',
+    'ml',
+    'deep learning',
+    'generative ai',
+    'llm',
+    'chatgpt',
+  ],
+}
+
+function normalizeSearchText(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ä/g, 'ae')
+    .replace(/ö/g, 'oe')
+    .replace(/ü/g, 'ue')
+    .replace(/ß/g, 'ss')
+    .replace(/&[#a-z0-9]+;/gi, ' ')
+    .replace(/[^a-z0-9+.#\s-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function queryTokens(query: string): string[] {
+  return normalizeSearchText(query)
+    .split(/[\s,;|/]+/)
+    .map(t => t.trim())
+    .filter(t => t.length >= 2 && !STOP_WORDS.has(t))
+}
+
+function containsSearchTerm(text: string, term: string): boolean {
+  if (term.length <= 2) {
+    return new RegExp(`(^|\\s)${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`).test(text)
+  }
+  return text.includes(term)
+}
+
+function relevanceScore(job: Job, query: string): number {
+  const normalizedQuery = normalizeSearchText(query)
+  const tokens = queryTokens(query)
+  if (!normalizedQuery || tokens.length === 0) return 1
+
+  const exactTerms = [
+    normalizedQuery,
+    ...(QUERY_SYNONYMS[normalizedQuery] ?? []),
+  ].map(normalizeSearchText)
+
+  const titleText = normalizeSearchText([job.title, job.tags?.join(' ')].filter(Boolean).join(' '))
+  const fullText = normalizeSearchText([
+    job.title,
+    job.company,
+    job.location,
+    job.description,
+    job.jobType,
+    job.tags?.join(' '),
+  ].filter(Boolean).join(' '))
+
+  let score = 0
+  for (const term of exactTerms) {
+    if (containsSearchTerm(titleText, term)) score += 10
+    else if (containsSearchTerm(fullText, term)) score += 5
+  }
+
+  const matchedTokens = tokens.filter(token => containsSearchTerm(fullText, token)).length
+  for (const token of tokens) {
+    if (containsSearchTerm(titleText, token)) score += 2
+    else if (containsSearchTerm(fullText, token)) score += 1
+  }
+
+  const enoughTokenCoverage = tokens.length <= 2
+    ? matchedTokens === tokens.length
+    : matchedTokens >= 2
+
+  return score > 0 && (score >= 5 || enoughTokenCoverage) ? score : 0
 }
 
 export async function GET(req: NextRequest) {
@@ -306,15 +394,25 @@ export async function GET(req: NextRequest) {
     } catch { /* Jooble nicht erreichbar */ }
   }
 
+  const scoredJobs = query.trim()
+    ? jobs
+        .map(job => ({ job, score: relevanceScore(job, query) }))
+        .filter(item => item.score > 0)
+    : jobs.map(job => ({ job, score: 0 }))
+
   // Nach Distanz sortieren wenn Koordinaten vorhanden, sonst nach Datum
-  jobs.sort((a, b) => {
-    if (a.distance !== undefined && b.distance !== undefined) return a.distance - b.distance
-    if (a.distance !== undefined) return -1
-    if (b.distance !== undefined) return 1
-    if (a.postedAt && b.postedAt) return new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime()
+  scoredJobs.sort((a, b) => {
+    if (a.score !== b.score) return b.score - a.score
+    const jobA = a.job
+    const jobB = b.job
+    if (jobA.distance !== undefined && jobB.distance !== undefined) return jobA.distance - jobB.distance
+    if (jobA.distance !== undefined) return -1
+    if (jobB.distance !== undefined) return 1
+    if (jobA.postedAt && jobB.postedAt) return new Date(jobB.postedAt).getTime() - new Date(jobA.postedAt).getTime()
     return 0
   })
 
-  const sources = [...new Set(jobs.map(j => j.source))]
-  return NextResponse.json({ jobs, total: jobs.length, sources, centerCoords: userCoords })
+  const relevantJobs = scoredJobs.map(item => item.job)
+  const sources = [...new Set(relevantJobs.map(j => j.source))]
+  return NextResponse.json({ jobs: relevantJobs, total: relevantJobs.length, sources, centerCoords: userCoords })
 }

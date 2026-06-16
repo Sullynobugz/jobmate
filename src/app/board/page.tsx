@@ -129,9 +129,9 @@ function WidCodeBanner({ onLink }: { onLink: (code: string) => void }) {
       style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)' }}>
       <Link2 className="w-4 h-4 text-indigo-600 flex-shrink-0" />
       <div className="flex-1 text-sm">
-        <span className="text-indigo-600 font-medium">WID-Kurs verknüpfen</span>
+        <span className="text-indigo-600 font-medium">Enter-Kurs verknüpfen</span>
         <span className="text-slate-400 ml-2">
-          Teilnehmer eines WID-Programms? Code eingeben damit dein Koordinator deinen Fortschritt sehen kann.
+          Teilnehmer eines Enter-Programms? Code eingeben damit dein Koordinator deinen Fortschritt sehen kann.
         </span>
       </div>
       {!open ? (
@@ -144,7 +144,7 @@ function WidCodeBanner({ onLink }: { onLink: (code: string) => void }) {
           <input
             value={code}
             onChange={e => setCode(e.target.value.toUpperCase())}
-            placeholder="WID-XXXXXX"
+            placeholder="z. B. AB23CD"
             className="bg-slate-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-gray-900 text-xs w-32 focus:outline-none focus:border-indigo-500"
           />
           <button

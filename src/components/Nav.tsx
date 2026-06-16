@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { FileText, Search, Kanban, MessageSquare, ShieldCheck } from 'lucide-react'
+import { FileText, Search, Kanban, MessageSquare, ShieldCheck, ArrowLeft } from 'lucide-react'
 import { getWidCode } from '@/store/appStore'
 
 const navItems = [
@@ -13,25 +13,41 @@ const navItems = [
   { href: '/interview', label: 'Interview',  icon: MessageSquare },
 ]
 
+const WID_HUB_URL = 'https://wid.techstag.de/lernen'
+
 export function Nav() {
   const pathname = usePathname()
   const [widCode, setWidCode] = useState<string | undefined>()
 
   useEffect(() => {
-    setWidCode(getWidCode())
+    const id = window.setTimeout(() => setWidCode(getWidCode()), 0)
+    return () => window.clearTimeout(id)
   }, [])
 
   return (
     <nav className="border-b" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
       {widCode && (
-        <div className="px-5 py-2 border-b text-xs flex items-center justify-center gap-2"
+        <div className="px-5 py-2 border-b text-xs flex flex-wrap items-center justify-center gap-2"
           style={{ borderColor: 'var(--border)', background: 'rgba(245,158,11,0.08)', color: 'var(--warning)' }}>
           <ShieldCheck className="w-3.5 h-3.5" />
-          <span className="font-semibold">WID-Programm verknüpft</span>
+          <span className="font-semibold">Enter-Programm verknüpft</span>
           <span className="font-mono">{widCode}</span>
           <span className="hidden sm:inline" style={{ color: 'var(--muted)' }}>
             · gespeicherte Jobs und Bewerbungen fließen ins Reporting
           </span>
+          <a
+            href={WID_HUB_URL}
+            className="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 font-semibold transition-colors"
+            style={{
+              borderColor: 'rgba(217,119,6,0.25)',
+              background: 'rgba(255,255,255,0.7)',
+              color: 'var(--warning)',
+              textDecoration: 'none',
+            }}
+          >
+            <ArrowLeft className="w-3 h-3" />
+            Zurück zu Enter
+          </a>
         </div>
       )}
 
@@ -44,7 +60,7 @@ export function Nav() {
           <div>
             <span className="font-bold leading-none" style={{ color: 'var(--text)' }}>JobMate</span>
             <p className="text-[10px] leading-none mt-0.5 hidden sm:block" style={{ color: 'var(--muted)' }}>
-              WID · Linguu · JobMate
+              Enter · Linguu · JobMate
             </p>
           </div>
         </Link>

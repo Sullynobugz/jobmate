@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import {
-  Search, MapPin, ExternalLink, Plus, Kanban, SlidersHorizontal,
-  Wifi, Building2, Euro, Tag, Calendar, X, FileText, ChevronRight, MessageSquare,
+  Search, MapPin, ExternalLink, Plus, SlidersHorizontal,
+  Wifi, Building2, Euro, Tag, Calendar, X, FileText, MessageSquare,
 } from 'lucide-react'
 import { addJob, addToKanban, loadState, savePreferences, trackJobSavedToWid } from '@/store/appStore'
 import type { Job, SearchPreferences, RemotePreference, JobSource } from '@/types'
@@ -41,7 +41,14 @@ const JOB_TYPES = [
 
 const RADII = [10, 25, 50, 100, 200]
 
-const QUICK_SEARCHES = ['Software Entwickler', 'Marketing Manager', 'Buchhalter', 'Projektmanager', 'Data Analyst', 'UX Designer']
+const QUICK_SEARCHES = [
+  'Soziales, Beratung, Teilzeit',
+  'IT Support, Quereinstieg',
+  'Marketing, Social Media',
+  'Büro, Verwaltung, Homeoffice',
+  'Data Analyst, SQL',
+  'UX Design, Research',
+]
 
 function relativeTime(iso: string | undefined): string {
   if (!iso) return ''
@@ -65,7 +72,7 @@ export default function JobsPage() {
   const [filtersOpen, setFiltersOpen] = useState(true)
   const [centerCoords, setCenterCoords] = useState<{ lat: number; lng: number } | null>(null)
   const [radarOpen, setRadarOpen] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
   const [prefs, setPrefs] = useState<SearchPreferences>({
     location: '',
@@ -121,6 +128,13 @@ export default function JobsPage() {
       setCenterCoords(data.centerCoords ?? null)
     } finally {
       setLoading(false)
+    }
+  }
+
+  function onQueryKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      search()
     }
   }
 
@@ -301,25 +315,38 @@ export default function JobsPage() {
 
           {/* Suchleiste */}
           <div className="px-5 py-4 border-b border-gray-100 flex-shrink-0">
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                <input
+                <Search className="absolute left-3 top-3.5 w-4 h-4 text-slate-500" />
+                <textarea
                   ref={inputRef}
                   value={query}
                   onChange={e => setQuery(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && search()}
-                  placeholder="Jobtitel, Skill oder Bereich..."
-                  className="w-full bg-slate-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-gray-900 placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                  onKeyDown={onQueryKeyDown}
+                  rows={2}
+                  placeholder="Beschreibe mit Stichworten, was dich interessiert: z.B. Pflege, Teilzeit, Quereinstieg, Homeoffice..."
+                  className="w-full min-h-[68px] resize-none bg-slate-50 border border-gray-200 rounded-xl pl-10 pr-4 py-3 text-gray-900 placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors leading-relaxed"
                 />
               </div>
               <button
                 onClick={() => search()}
                 disabled={loading}
-                className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white rounded-xl px-5 py-2.5 text-sm font-semibold transition-colors whitespace-nowrap"
+                className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white rounded-xl px-5 py-2.5 text-sm font-semibold transition-colors whitespace-nowrap sm:self-stretch"
               >
                 {loading ? 'Suche läuft…' : 'Suchen'}
               </button>
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <span className="text-xs text-slate-500 mr-1">Beispiele:</span>
+              {QUICK_SEARCHES.slice(0, 4).map(q => (
+                <button
+                  key={q}
+                  onClick={() => { setQuery(q); search(q) }}
+                  className="text-xs text-slate-600 hover:text-indigo-600 border border-gray-200 hover:border-indigo-500 hover:bg-indigo-500/10 px-2.5 py-1 rounded-lg transition-all"
+                >
+                  {q}
+                </button>
+              ))}
             </div>
 
             {/* Status-Zeile */}
@@ -392,12 +419,12 @@ export default function JobsPage() {
                 </div>
                 <p className="text-gray-900 font-semibold text-lg mb-1">Jobs finden</p>
                 <p className="text-slate-500 text-sm mb-6 leading-relaxed">
-                  Suche nach Jobtitel oder Bereich — oder lass das Feld leer und such nur nach Ort.
+                  Beschreibe in Stichworten, was dich interessiert. JobMate sucht daraus passende Stellenanzeigen.
                 </p>
 
                 {/* Schnellsuche */}
                 <div className="w-full">
-                  <p className="text-xs text-slate-600 uppercase tracking-wide mb-3">Beliebte Suchen</p>
+                  <p className="text-xs text-slate-600 uppercase tracking-wide mb-3">Beispiele</p>
                   <div className="flex flex-wrap gap-2 justify-center">
                     {QUICK_SEARCHES.map(q => (
                       <button
