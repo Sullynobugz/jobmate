@@ -9,6 +9,7 @@ const DEFAULT_PREFS: SearchPreferences = {
   radius: 50,
   remote: 'any',
   jobTypes: [],
+  country: 'de',
 }
 
 function defaultState(): AppState {
@@ -59,6 +60,23 @@ export function addJob(job: Job) {
   const s = loadState()
   if (s.savedJobs.find(j => j.id === job.id)) return
   save({ ...s, savedJobs: [...s.savedJobs, job] })
+}
+
+export function addManualJob(url: string, title: string, company: string): Job {
+  const id = `manual_${Date.now()}`
+  const job: Job = {
+    id,
+    title: title.trim() || 'Stelle (manuell)',
+    company: company.trim(),
+    location: '',
+    description: '',
+    url,
+    source: 'manual',
+    postedAt: new Date().toISOString(),
+  }
+  addJob(job)
+  addToKanban(id, 'saved')
+  return job
 }
 
 export function removeJob(jobId: string) {

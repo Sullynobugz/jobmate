@@ -22,11 +22,14 @@ export interface Job {
   tags?: string[]
 }
 
+export type CountryPreference = 'de' | 'world'
+
 export interface SearchPreferences {
   location: string
   radius: number
   remote: RemotePreference
   jobTypes: string[]
+  country: CountryPreference
 }
 
 export type KanbanColumn = 'saved' | 'applied' | 'interview' | 'offer' | 'rejected'

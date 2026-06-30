@@ -6,7 +6,7 @@ import {
   Wifi, Building2, Euro, Tag, Calendar, X, FileText, MessageSquare,
 } from 'lucide-react'
 import { addJob, addToKanban, loadState, savePreferences, trackJobSavedToWid } from '@/store/appStore'
-import type { Job, SearchPreferences, RemotePreference, JobSource } from '@/types'
+import type { Job, SearchPreferences, RemotePreference, CountryPreference, JobSource } from '@/types'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { Nav } from '@/components/Nav'
@@ -79,6 +79,7 @@ export default function JobsPage() {
     radius: 50,
     remote: 'any',
     jobTypes: [],
+    country: 'de',
   })
 
   useEffect(() => {
@@ -120,6 +121,7 @@ export default function JobsPage() {
         location: prefs.location,
         radius: String(prefs.radius),
         remote: prefs.remote,
+        country: prefs.country,
       })
       const res = await fetch(`/api/jobs?${params}`)
       const data = await res.json()
@@ -246,6 +248,29 @@ export default function JobsPage() {
                       }`}
                     >
                       {opt.icon}
+                      <span className="text-xs">{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Land */}
+              <div>
+                <label className="text-xs text-slate-500 font-medium uppercase tracking-wide mb-2 block">Land</label>
+                <div className="flex flex-col gap-1">
+                  {([
+                    { id: 'de',    label: '🇩🇪 Nur Deutschland' },
+                    { id: 'world', label: '🌍 Auch international' },
+                  ] as { id: CountryPreference; label: string }[]).map(opt => (
+                    <button
+                      key={opt.id}
+                      onClick={() => updatePref('country', opt.id)}
+                      className={`flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg border transition-all text-left ${
+                        prefs.country === opt.id
+                          ? 'bg-indigo-600/20 border-indigo-500 text-indigo-600'
+                          : 'bg-slate-50/50 border-gray-200 text-slate-400 hover:border-gray-400 hover:text-slate-700'
+                      }`}
+                    >
                       <span className="text-xs">{opt.label}</span>
                     </button>
                   ))}

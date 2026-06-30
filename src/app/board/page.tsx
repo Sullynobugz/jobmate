@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react'
 import {
   loadState, moveKanbanCard, getJobById, updateKanbanNote,
-  toggleStar, getWidCode, setWidCode, trackApplicationToWid,
+  toggleStar, getWidCode, setWidCode, trackApplicationToWid, addManualJob,
 } from '@/store/appStore'
 import type { KanbanCard, KanbanColumn, Job } from '@/types'
 import {
-  ExternalLink, StickyNote, FileText, Search, Kanban, ChevronRight,
-  Star, X, Clock, ShieldCheck, Link2, HelpCircle, GripVertical,
+  ExternalLink, StickyNote, Star, X, Clock, ShieldCheck,
+  Link2, HelpCircle, GripVertical, Plus,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Nav } from '@/components/Nav'
@@ -171,6 +171,10 @@ export default function BoardPage() {
   const [dragging, setDragging] = useState<string | null>(null)
   const [widCode, setWidCodeState] = useState<string | undefined>()
   const [applicationPending, setApplicationPending] = useState<{ jobId: string; targetCol: KanbanColumn } | null>(null)
+  const [pasteUrl, setPasteUrl] = useState('')
+  const [pasteTitle, setPasteTitle] = useState('')
+  const [pasteCompany, setPasteCompany] = useState('')
+  const [pasteOpen, setPasteOpen] = useState(false)
 
   useEffect(() => {
     refresh()
@@ -218,6 +222,21 @@ export default function BoardPage() {
   function handleLinkWidCode(code: string) {
     setWidCode(code)
     setWidCodeState(code)
+  }
+
+  function addPasteJob() {
+    if (!pasteUrl.trim()) return
+    addManualJob(pasteUrl.trim(), pasteTitle, pasteCompany)
+    setPasteUrl('')
+    setPasteTitle('')
+    setPasteCompany('')
+    setPasteOpen(false)
+    refresh()
+  }
+
+  function onPasteUrlChange(val: string) {
+    setPasteUrl(val)
+    if (val.trim() && !pasteOpen) setPasteOpen(true)
   }
 
   function saveNote(jobId: string) {
@@ -280,6 +299,52 @@ export default function BoardPage() {
                     {cardsForCol(col.id).length}
                   </span>
                 </div>
+
+                {/* URL-Paste nur in "Gemerkt"-Spalte */}
+                {col.id === 'saved' && (
+                  <div className="mb-3">
+                    <input
+                      value={pasteUrl}
+                      onChange={e => onPasteUrlChange(e.target.value)}
+                      onPaste={e => {
+                        const val = e.clipboardData.getData('text')
+                        onPasteUrlChange(val)
+                      }}
+                      placeholder="🔗 Link einfügen…"
+                      className="w-full bg-white border border-dashed border-gray-300 hover:border-indigo-400 focus:border-indigo-500 rounded-xl px-3 py-2 text-gray-900 text-xs placeholder-slate-400 focus:outline-none transition-colors"
+                    />
+                    {pasteOpen && (
+                      <div className="mt-2 space-y-1.5">
+                        <input
+                          value={pasteTitle}
+                          onChange={e => setPasteTitle(e.target.value)}
+                          placeholder="Jobtitel (optional)"
+                          className="w-full bg-white border border-gray-200 rounded-xl px-3 py-1.5 text-gray-900 text-xs placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+                        />
+                        <input
+                          value={pasteCompany}
+                          onChange={e => setPasteCompany(e.target.value)}
+                          placeholder="Unternehmen (optional)"
+                          className="w-full bg-white border border-gray-200 rounded-xl px-3 py-1.5 text-gray-900 text-xs placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+                        />
+                        <div className="flex gap-1.5">
+                          <button
+                            onClick={addPasteJob}
+                            className="flex-1 flex items-center justify-center gap-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded-xl py-1.5 transition-colors cursor-pointer"
+                          >
+                            <Plus className="w-3 h-3" /> Hinzufügen
+                          </button>
+                          <button
+                            onClick={() => { setPasteUrl(''); setPasteTitle(''); setPasteCompany(''); setPasteOpen(false) }}
+                            className="px-3 text-slate-400 hover:text-slate-700 text-xs transition-colors cursor-pointer"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   {cardsForCol(col.id).map(card => {

@@ -37,47 +37,62 @@ function detectRemote(title: string, description: string): boolean {
   return REMOTE_KEYWORDS.some(kw => text.includes(kw))
 }
 
-// Prüft ob ein Job-Standort zum Nutzer-Standort passt (einfache Textprüfung).
-// Gibt true zurück wenn kein Filter gesetzt oder eine Übereinstimmung gefunden wird.
 function locationMatches(jobLocation: string, userLocation: string): boolean {
   if (!userLocation) return true
   const jl = jobLocation.toLowerCase()
   const ul = userLocation.toLowerCase()
-  // Übereinstimmung wenn jobLocation den Nutzerort oder umgekehrt enthält
   return jl.includes(ul) || ul.includes(jl)
 }
 
 const STOP_WORDS = new Set([
   'der', 'die', 'das', 'den', 'dem', 'des', 'ein', 'eine', 'einen', 'einem', 'einer',
-  'und', 'oder', 'mit', 'für', 'von', 'im', 'in', 'am', 'an', 'auf', 'als', 'zu',
+  'und', 'oder', 'mit', 'fur', 'von', 'im', 'in', 'am', 'an', 'auf', 'als', 'zu',
   'job', 'jobs', 'stelle', 'stellen', 'arbeit',
 ])
 
-const QUERY_SYNONYMS: Record<string, string[]> = {
-  'kunstliche intelligenz': [
-    'ki',
-    'ai',
-    'artificial intelligence',
-    'machine learning',
-    'ml',
-    'deep learning',
-    'generative ai',
-    'llm',
-    'chatgpt',
-  ],
-}
+// Bidirektionale Synonym-Gruppen. Index 0 = bevorzugter API-Suchbegriff.
+const SYNONYM_GROUPS: string[][] = [
+  ['kunstliche intelligenz', 'ki', 'ai', 'artificial intelligence', 'machine learning', 'ml', 'deep learning', 'generative ai', 'llm', 'chatgpt', 'gpt', 'nlp', 'neural network', 'neuronales netz'],
+  ['softwareentwickler', 'software developer', 'entwickler', 'programmer', 'programmierer', 'softwareentwicklung', 'software engineer', 'webentwickler', 'web developer', 'fullstack', 'frontend', 'backend'],
+  ['buchhalter', 'buchhaltung', 'accountant', 'finanzbuchhaltung', 'rechnungswesen', 'bilanzbuchhalter', 'steuerfachangestellter'],
+  ['pflegefachkraft', 'pflegekraft', 'krankenpflege', 'krankenschwester', 'altenpflege', 'altenpfleger', 'pflegerin', 'pfleger', 'pflegehelfer', 'gesundheitspflege'],
+  ['vertrieb', 'sales', 'aussendienst', 'akquise', 'verkaufer', 'verkauf', 'account manager', 'kundenbetreuer', 'handelsvertreter'],
+  ['projektmanager', 'projektleiter', 'project manager', 'projektmanagement', 'projektleitung', 'scrum master', 'agile coach'],
+  ['ux', 'user experience', 'ui', 'user interface', 'ux design', 'ui design', 'produktdesign', 'interfacedesign', 'interaction design'],
+  ['datenanalyse', 'data analyst', 'data scientist', 'data science', 'datenanalyst', 'datenwissenschaft', 'business intelligence', 'bi analyst', 'sql', 'tableau', 'power bi'],
+  ['marketing', 'online marketing', 'digitalmarketing', 'seo', 'suchmaschinenoptimierung', 'sem', 'content marketing', 'performance marketing', 'growth hacker', 'social media manager'],
+  ['erzieher', 'erzieherin', 'sozialpadagoge', 'sozialer dienst', 'kita', 'kindergarten', 'fruhkindliche bildung', 'padagogik', 'sozialpadagogik'],
+  ['fahrer', 'kraftfahrer', 'lkw fahrer', 'berufskraftfahrer', 'lieferant', 'lieferfahrer', 'transportfahrer'],
+  ['lagerlogistik', 'lagerarbeiter', 'lagerhaltung', 'logistik', 'kommissionierer', 'warehouse', 'lager'],
+  ['elektriker', 'elektroinstallateur', 'elektroniker', 'elektrotechniker', 'elektrofachkraft', 'elektrik', 'elektro'],
+  ['reinigung', 'reinigungskraft', 'gebaudereinigung', 'hausmeister', 'hausreinigung', 'facility management'],
+  ['kundenservice', 'kundendienst', 'customer service', 'kundenbetreuung', 'support', 'helpdesk', 'callcenter', 'hotline'],
+  ['teilzeit', 'part time', 'parttime', 'halbtags', 'stundenweise', 'minijob', 'geringfugig'],
+  ['quereinstieg', 'karrierewechsel', 'umschulung', 'quereinsteiger', 'berufsumstieg', 'neueinsteiger'],
+  ['dozent', 'lehrer', 'ausbilder', 'trainer', 'lehrbeauftragter', 'kursleiter', 'lehrerin', 'ausbilderin', 'coach', 'weiterbildung'],
+  ['arzt', 'mediziner', 'facharzt', 'hausarzt', 'allgemeinmedizin', 'medizin', 'physician', 'doctor'],
+  ['hr', 'personalwesen', 'personalabteilung', 'human resources', 'recruiter', 'recruiting', 'personalreferent'],
+  ['controlling', 'controller', 'finanzen', 'finance', 'kpi', 'reporting', 'finanzanalyse'],
+  ['it sicherheit', 'cybersecurity', 'informationssicherheit', 'security analyst', 'penetration testing', 'it security'],
+  ['cloud', 'aws', 'azure', 'google cloud', 'devops', 'kubernetes', 'docker', 'infrastruktur'],
+  ['ecommerce', 'e-commerce', 'onlineshop', 'shopify', 'amazon', 'marktplatz', 'webshop'],
+]
 
 function normalizeSearchText(value: string): string {
   return value
     .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/-/g, ' ')
     .replace(/ä/g, 'ae')
     .replace(/ö/g, 'oe')
     .replace(/ü/g, 'ue')
     .replace(/ß/g, 'ss')
+    .replace(/Ä/g, 'ae')
+    .replace(/Ö/g, 'oe')
+    .replace(/Ü/g, 'ue')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
     .replace(/&[#a-z0-9]+;/gi, ' ')
-    .replace(/[^a-z0-9+.#\s-]/g, ' ')
+    .replace(/[^a-z0-9+.#\s]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
 }
@@ -89,9 +104,20 @@ function queryTokens(query: string): string[] {
     .filter(t => t.length >= 2 && !STOP_WORDS.has(t))
 }
 
+function getSynonymsForToken(token: string): string[] {
+  for (const group of SYNONYM_GROUPS) {
+    const normGroup = group.map(normalizeSearchText)
+    if (normGroup.includes(token)) {
+      return normGroup.filter(t => t !== token)
+    }
+  }
+  return []
+}
+
 function containsSearchTerm(text: string, term: string): boolean {
   if (term.length <= 2) {
-    return new RegExp(`(^|\\s)${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`).test(text)
+    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    return new RegExp(`(^|[\\s])${escaped}([\\s]|$)`).test(text)
   }
   return text.includes(term)
 }
@@ -101,10 +127,13 @@ function relevanceScore(job: Job, query: string): number {
   const tokens = queryTokens(query)
   if (!normalizedQuery || tokens.length === 0) return 1
 
-  const exactTerms = [
-    normalizedQuery,
-    ...(QUERY_SYNONYMS[normalizedQuery] ?? []),
-  ].map(normalizeSearchText)
+  const allSearchTerms = new Set<string>([normalizedQuery])
+  for (const token of tokens) {
+    allSearchTerms.add(token)
+    for (const syn of getSynonymsForToken(token)) {
+      allSearchTerms.add(syn)
+    }
+  }
 
   const titleText = normalizeSearchText([job.title, job.tags?.join(' ')].filter(Boolean).join(' '))
   const fullText = normalizeSearchText([
@@ -117,16 +146,15 @@ function relevanceScore(job: Job, query: string): number {
   ].filter(Boolean).join(' '))
 
   let score = 0
-  for (const term of exactTerms) {
+  for (const term of allSearchTerms) {
     if (containsSearchTerm(titleText, term)) score += 10
     else if (containsSearchTerm(fullText, term)) score += 5
   }
 
-  const matchedTokens = tokens.filter(token => containsSearchTerm(fullText, token)).length
-  for (const token of tokens) {
-    if (containsSearchTerm(titleText, token)) score += 2
-    else if (containsSearchTerm(fullText, token)) score += 1
-  }
+  const matchedTokens = tokens.filter(token => {
+    const candidates = [token, ...getSynonymsForToken(token)]
+    return candidates.some(t => containsSearchTerm(fullText, t))
+  }).length
 
   const enoughTokenCoverage = tokens.length <= 2
     ? matchedTokens === tokens.length
@@ -142,67 +170,68 @@ export async function GET(req: NextRequest) {
   const radius = parseInt(searchParams.get('radius') || '50', 10)
   const remote = searchParams.get('remote') || 'any'
   const page = searchParams.get('page') || '1'
+  const country = searchParams.get('country') || 'de'  // 'de' = nur Deutschland, 'world' = international
 
   const jobs: Job[] = []
   const seen = new Set<string>()
 
-  // Nutzerkoordinaten für Distanzberechnung
   let userCoords: { lat: number; lng: number } | null = null
   if (location && remote !== 'remote') {
     userCoords = await geocode(location)
   }
 
   // ─── 1. Bundesagentur für Arbeit ────────────────────────────────────────────
-  if (remote !== 'remote') {
-    try {
-      const baParams = new URLSearchParams({
-        was: query,
-        wo: location,
-        umkreis: String(radius),
-        page,
-        size: '25',
-      })
-      const baRes = await fetch(
-        `https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?${baParams}`,
-        { headers: { 'X-API-Key': 'jobboerse-jobsuche', Accept: 'application/json' } }
-      )
-      if (baRes.ok) {
-        const data = await baRes.json()
-        for (const item of data.stellenangebote ?? []) {
-          const refnr = item.refnr
-          if (!refnr) continue
-          const id = `ba_${refnr}`
-          if (seen.has(id)) continue
-          seen.add(id)
-          const lat = item.arbeitsort?.koordinaten?.lat
-          const lng = item.arbeitsort?.koordinaten?.lon
-          const distanceKm = item.arbeitsort?.entfernung
-            ? parseInt(item.arbeitsort.entfernung, 10)
-            : userCoords && lat && lng
-              ? Math.round(haversineKm(userCoords.lat, userCoords.lng, lat, lng))
-              : undefined
-          const isRemoteBa = detectRemote(item.titel ?? '', item.kurzbeschreibung ?? '')
-          // Außerhalb des Radius und nicht remote → überspringen
-          if (userCoords && distanceKm !== undefined && distanceKm > radius && !isRemoteBa) continue
-          const url = item.externeUrl || `https://www.arbeitsagentur.de/jobsuche/jobdetail/${refnr}`
-          jobs.push({
-            id,
-            title: item.titel ?? '',
-            company: item.arbeitgeber ?? '',
-            location: isRemoteBa ? `${item.arbeitsort?.ort ?? ''} (Remote möglich)` : (item.arbeitsort?.ort ?? ''),
-            description: item.kurzbeschreibung ?? '',
-            url,
-            source: 'ba',
-            postedAt: relativeDate(item.aktuelleVeroeffentlichungsdatum ?? item.eintrittsdatum),
-            lat,
-            lng,
-            distance: isRemoteBa ? undefined : distanceKm,
-            remote: isRemoteBa,
-          })
-        }
+  // Läuft immer — auch bei "Nur Remote", weil BA viele Mobile-Arbeiten-Stellen hat.
+  // Remote-Filter passiert nach dem Einlesen.
+  try {
+    const baParams = new URLSearchParams({
+      was: query,
+      wo: location || 'Deutschland',
+      umkreis: String(radius),
+      page,
+      size: '50',
+    })
+    const baRes = await fetch(
+      `https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?${baParams}`,
+      { headers: { 'X-API-Key': 'jobboerse-jobsuche', Accept: 'application/json' } }
+    )
+    if (baRes.ok) {
+      const data = await baRes.json()
+      for (const item of data.stellenangebote ?? []) {
+        const refnr = item.refnr
+        if (!refnr) continue
+        const id = `ba_${refnr}`
+        if (seen.has(id)) continue
+        seen.add(id)
+        const lat = item.arbeitsort?.koordinaten?.lat
+        const lng = item.arbeitsort?.koordinaten?.lon
+        const distanceKm = item.arbeitsort?.entfernung
+          ? parseInt(item.arbeitsort.entfernung, 10)
+          : userCoords && lat && lng
+            ? Math.round(haversineKm(userCoords.lat, userCoords.lng, lat, lng))
+            : undefined
+        const isRemoteBa = detectRemote(item.titel ?? '', item.kurzbeschreibung ?? '')
+        if (remote === 'remote' && !isRemoteBa) continue
+        if (remote === 'onsite' && isRemoteBa) continue
+        if (userCoords && distanceKm !== undefined && distanceKm > radius && !isRemoteBa) continue
+        const url = item.externeUrl || `https://www.arbeitsagentur.de/jobsuche/jobdetail/${refnr}`
+        jobs.push({
+          id,
+          title: item.titel ?? '',
+          company: item.arbeitgeber ?? '',
+          location: isRemoteBa ? `${item.arbeitsort?.ort ?? ''} (Remote möglich)` : (item.arbeitsort?.ort ?? ''),
+          description: item.kurzbeschreibung ?? '',
+          url,
+          source: 'ba',
+          postedAt: relativeDate(item.aktuelleVeroeffentlichungsdatum ?? item.eintrittsdatum),
+          lat,
+          lng,
+          distance: isRemoteBa ? undefined : distanceKm,
+          remote: isRemoteBa,
+        })
       }
-    } catch { /* BA nicht erreichbar */ }
-  }
+    }
+  } catch { /* BA nicht erreichbar */ }
 
   // ─── 2. Arbeitnow (DE-fokussierter Aggregator) ──────────────────────────────
   try {
@@ -219,7 +248,6 @@ export async function GET(req: NextRequest) {
         const isRemote = item.remote === true || detectRemote(item.title ?? '', item.description ?? '')
         if (remote === 'remote' && !isRemote) continue
         if (remote === 'onsite' && isRemote) continue
-        // Wenn Standort gesetzt: Nicht-Remote-Jobs nur aufnehmen wenn Ort passt
         if (location && !isRemote && !locationMatches(item.location ?? '', location)) continue
         jobs.push({
           id,
@@ -237,8 +265,9 @@ export async function GET(req: NextRequest) {
     }
   } catch { /* Arbeitnow nicht erreichbar */ }
 
-  // ─── 3. Remotive (Remote-Jobs) ───────────────────────────────────────────────
-  if (remote !== 'onsite') {
+  // ─── 3. Remotive (Remote-Jobs, international) ────────────────────────────────
+  // Nur bei country === 'world' oder wenn explizit Remote gewählt
+  if (remote !== 'onsite' && (country === 'world' || remote === 'remote')) {
     try {
       const remotiveParams = new URLSearchParams({ search: query, limit: '20' })
       const rRes = await fetch(`https://remotive.com/api/remote-jobs?${remotiveParams}`, {
@@ -269,8 +298,9 @@ export async function GET(req: NextRequest) {
     } catch { /* Remotive nicht erreichbar */ }
   }
 
-  // ─── 4. RemoteOK ─────────────────────────────────────────────────────────────
-  if (remote !== 'onsite' && query) {
+  // ─── 4. RemoteOK (international) ─────────────────────────────────────────────
+  // Nur bei country === 'world' oder wenn explizit Remote gewählt
+  if (remote !== 'onsite' && query && (country === 'world' || remote === 'remote')) {
     try {
       const tags = query.toLowerCase().replace(/\s+/g, ',')
       const rokRes = await fetch(`https://remoteok.com/api?tags=${encodeURIComponent(tags)}`, {
@@ -278,7 +308,6 @@ export async function GET(req: NextRequest) {
       })
       if (rokRes.ok) {
         const data: unknown[] = await rokRes.json()
-        // Erstes Element ist ein Legal-Notice-Objekt, überspringen
         for (const item of (data.slice(1) as Record<string, unknown>[]).slice(0, 15)) {
           const slug = item.slug as string | undefined
           if (!slug) continue
@@ -400,7 +429,6 @@ export async function GET(req: NextRequest) {
         .filter(item => item.score > 0)
     : jobs.map(job => ({ job, score: 0 }))
 
-  // Nach Distanz sortieren wenn Koordinaten vorhanden, sonst nach Datum
   scoredJobs.sort((a, b) => {
     if (a.score !== b.score) return b.score - a.score
     const jobA = a.job
