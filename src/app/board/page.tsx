@@ -353,7 +353,8 @@ export default function BoardPage() {
                     return (
                       <div
                         key={card.jobId}
-                        className={`bg-white border rounded-xl p-3 transition-all select-none ${
+                        onClick={() => job.url && window.open(job.url, '_blank', 'noopener,noreferrer')}
+                        className={`bg-white border rounded-xl p-3 transition-all select-none cursor-pointer ${
                           card.starred
                             ? 'border-yellow-500/50 shadow-[0_0_12px_rgba(234,179,8,0.12)]'
                             : 'border-gray-200 hover:border-slate-400'
@@ -363,8 +364,9 @@ export default function BoardPage() {
                           {/* Drag-Handle — nur dieser Bereich löst Drag aus */}
                           <div
                             draggable
-                            onDragStart={e => onDragStart(e, card.jobId)}
+                            onDragStart={e => { e.stopPropagation(); onDragStart(e, card.jobId) }}
                             onDragEnd={() => setDragging(null)}
+                            onClick={e => e.stopPropagation()}
                             className="flex-shrink-0 mt-0.5 p-0.5 rounded cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 transition-colors"
                             title="Ziehen um Spalte zu wechseln"
                           >
@@ -378,7 +380,7 @@ export default function BoardPage() {
                             <p className="text-slate-500 text-xs">{job.company} · {job.location}</p>
                           </div>
                           <button
-                            onClick={e => handleStar(e, card.jobId)}
+                            onClick={e => { e.stopPropagation(); handleStar(e, card.jobId) }}
                             className={`p-1.5 rounded-lg flex-shrink-0 transition-colors cursor-pointer ${
                               card.starred ? 'text-yellow-600' : 'text-slate-300 hover:text-slate-500'
                             }`}
@@ -407,7 +409,7 @@ export default function BoardPage() {
 
                         <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
                           <button
-                            onClick={() => { setEditNote(card.jobId); setNoteText(card.notes || '') }}
+                            onClick={e => { e.stopPropagation(); setEditNote(card.jobId); setNoteText(card.notes || '') }}
                             className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
                             title="Notiz bearbeiten"
                           >
@@ -417,6 +419,7 @@ export default function BoardPage() {
                             href={job.url}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={e => e.stopPropagation()}
                             className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
                             title="Job öffnen"
                           >
@@ -429,7 +432,7 @@ export default function BoardPage() {
                           {COLUMNS.filter(c => c.id !== col.id).map(c => (
                             <button
                               key={c.id}
-                              onClick={() => handleMove(card.jobId, c.id)}
+                              onClick={e => { e.stopPropagation(); handleMove(card.jobId, c.id) }}
                               className="text-xs text-slate-500 hover:text-indigo-600 px-2 py-1 rounded-lg hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all cursor-pointer"
                             >
                               → {c.label.split(' ')[1]}
