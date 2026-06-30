@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react'
 import {
   loadState, moveKanbanCard, getJobById, updateKanbanNote,
-  toggleStar, getWidCode, setWidCode, trackApplicationToWid, addManualJob,
+  toggleStar, getWidCode, setWidCode, trackApplicationToWid, addManualJob, removeJob,
 } from '@/store/appStore'
 import type { KanbanCard, KanbanColumn, Job } from '@/types'
 import {
   ExternalLink, StickyNote, Star, X, Clock, ShieldCheck,
-  Link2, HelpCircle, GripVertical, Plus,
+  Link2, HelpCircle, GripVertical, Plus, Trash2,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Nav } from '@/components/Nav'
@@ -425,6 +425,13 @@ export default function BoardPage() {
                           >
                             <ExternalLink className="w-3.5 h-3.5" />
                           </a>
+                          <button
+                            onClick={e => { e.stopPropagation(); removeJob(card.jobId); refresh() }}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                            title="Aus Board entfernen"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
 
                         {/* Move-Buttons */}
